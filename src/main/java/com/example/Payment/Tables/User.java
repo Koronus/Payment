@@ -2,6 +2,9 @@ package com.example.Payment.Tables;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Entity
 @Table(name = "Users") // Указываем имя таблицы в БД
 public class User {
@@ -25,10 +28,23 @@ public class User {
     private String email;
 
     @Column(name = "Created_At", length = 255)
-    private String Created_At;
+    private LocalDateTime Created_At;
 
     @Column(name = "Updated_At", length = 255)
-    private String Updated_At;
+    private LocalDateTime Updated_At;
+
+    // Автоматическое установление времени создания
+    @PrePersist
+    protected void onCreate() {
+        Created_At = LocalDateTime.now();
+        Updated_At = LocalDateTime.now();
+    }
+
+    // Автоматическое обновление времени при изменении
+    @PreUpdate
+    protected void onUpdate() {
+        Updated_At = LocalDateTime.now();
+    }
 
     private boolean completed;
 
@@ -37,7 +53,7 @@ public class User {
         // Пустой конструктор обязателен для JPA
     }
 
-    public User(Long userId, String surname, String nameUser, String patronymic, String email,String Created_At, String Updated_At,boolean completed) {
+    public User(Long userId, String surname, String nameUser, String patronymic, String email,LocalDateTime Created_At, LocalDateTime Updated_At,boolean completed) {
         this.userId = userId;
         this.surname = surname;
         this.nameUser = nameUser;
@@ -89,13 +105,21 @@ public class User {
         this.email = email;
     }
 
-    public String getCreated_At() { return Created_At;}
+    public String getCreated_At() {
+        if (Created_At == null) return null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return Created_At.format(formatter);
+    }
 
-    public void setCreated_At(String Created_At) {this.Created_At = Created_At;}
+    protected void setCreated_At(LocalDateTime Created_At) {this.Created_At = Created_At;}
 
-    public String getUpdated_At() { return Updated_At;}
+    public String getUpdated_At() {
+        if (Updated_At == null) return null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return Updated_At.format(formatter);
+    }
 
-    public void setUpdated_At(String Updated_At) {this.Updated_At = Updated_At;}
+    public void setUpdated_At(LocalDateTime Updated_At) {this.Updated_At = Updated_At;}
 
     public boolean isCompleted() {
         return completed;

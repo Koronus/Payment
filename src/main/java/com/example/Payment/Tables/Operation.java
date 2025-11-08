@@ -2,18 +2,20 @@ package com.example.Payment.Tables;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
-@Table(name = "Users") // Указываем имя таблицы в БД
+@Table(name = "Operations") // Указываем имя таблицы в БД
 public class Operation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "operation_seq")
+    @SequenceGenerator(name = "operation_seq", sequenceName = "operation_id_seq", allocationSize = 1)
     @Column(name = "Operations_ID")
     private Long Operations_ID;
 
-    @Column(name = "amount", length = 255)
-    private String amount;
+    @Column(name = "amount",  precision = 10, scale = 2)
+    private BigDecimal amount;              //BigDecimal для денежных сумм
 
     @Column(name = "purpose", length = 255)
     private String purpose;
@@ -24,19 +26,19 @@ public class Operation {
 
 
     @Column(name = "User_ID", length = 255)
-    private Long User_ID;
+    private Long userID;
 
     // Конструкторы
     public Operation() {
         // Пустой конструктор обязателен для JPA
     }
 
-    public Operation(Long Operations_ID, String amount, String purpose, String created_at, Long User_ID) {
+    public Operation(Long Operations_ID, BigDecimal amount, String purpose, String created_at, Long userID) {
         this.Operations_ID = Operations_ID;
         this.amount = amount;
         this.purpose = purpose;
         this.created_at = created_at;
-        this.User_ID = User_ID;
+        this.userID = userID;
     }
 
     // Геттеры и сеттеры
@@ -49,11 +51,11 @@ public class Operation {
         Operations_ID = operations_ID;
     }
 
-    public String getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -74,11 +76,11 @@ public class Operation {
     }
 
     public Long getUser_ID() {
-        return User_ID;
+        return userID;
     }
 
     public void setUser_ID(Long user_ID) {
-        User_ID = user_ID;
+        userID = user_ID;
     }
 
     // toString метод для удобства отладки
@@ -89,7 +91,7 @@ public class Operation {
                 ", amount='" + amount + '\'' +
                 ", purpose='" + purpose + '\'' +
                 ", created_at='" + created_at + '\'' +
-                ", User_ID='" + User_ID + '\'' +
+                ", User_ID='" + userID+ '\'' +
                 '}';
     }
 }
