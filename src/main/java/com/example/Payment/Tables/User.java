@@ -4,16 +4,16 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Users") // Указываем имя таблицы в БД
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_id_seq", allocationSize = 1)
+    @GeneratedValue
     @Column(name = "user_id")
-    private Long userId;
+    private UUID userId;
 
     @Column(name = "surname", length = 255)
     private String surname;
@@ -33,9 +33,12 @@ public class User {
     @Column(name = "Updated_At", length = 255)
     private LocalDateTime Updated_At;
 
-    // Автоматическое установление времени создания
+    // Автоматическое установление случайного id и текущего времени создания
     @PrePersist
     protected void onCreate() {
+        if (userId == null) {
+            userId = UUID.randomUUID();
+        }
         Created_At = LocalDateTime.now();
         Updated_At = LocalDateTime.now();
     }
@@ -53,7 +56,7 @@ public class User {
         // Пустой конструктор обязателен для JPA
     }
 
-    public User(Long userId, String surname, String nameUser, String patronymic, String email,LocalDateTime Created_At, LocalDateTime Updated_At,boolean completed) {
+    public User(UUID userId, String surname, String nameUser, String patronymic, String email,LocalDateTime Created_At, LocalDateTime Updated_At,boolean completed) {
         this.userId = userId;
         this.surname = surname;
         this.nameUser = nameUser;
@@ -64,12 +67,15 @@ public class User {
         this.completed = completed;
     }
 
+
+
+
     // Геттеры и сеттеры
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 
@@ -107,7 +113,7 @@ public class User {
 
     public String getCreated_At() {
         if (Created_At == null) return null;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return Created_At.format(formatter);
     }
 
@@ -115,7 +121,7 @@ public class User {
 
     public String getUpdated_At() {
         if (Updated_At == null) return null;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return Updated_At.format(formatter);
     }
 

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список операций</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .operations-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .operations-table th {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .operations-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .operations-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .card-number {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .amount {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-data i {
+            font-size: 3em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats {
+                justify-content: center;
+            }
+
+            .operations-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📋 История операций</h1>
+        <p>Все платежные операции системы</p>
+    </div>
+
+    <div class="controls">
+        <a href="/" class="back-btn">
+            ← На главную
+        </a>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${totalOperations ?: 0}">0</div>
+                <div class="stat-label">Всего операций</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${successOperations ?: 0}">0</div>
+                <div class="stat-label">Успешных</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${failedOperations ?: 0}">0</div>
+                <div class="stat-label">Ошибок</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сообщение об ошибке -->
+    <div th:if="${error}" class="error-message">
+        <strong>Ошибка:</strong> <span th:text="${error}"></span>
+    </div>
+
+    <!-- Таблица операций -->
+    <div th:if="${operations} and ${operations.size()} > 0">
+        <table class="operations-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>ФИО</th>
+                <th>Сумма</th>
+                <th>Назначение</th>
+                <th>Карта</th>
+                <th>Статус</th>
+                <th>Дата создания</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="operation : ${operations}">
+                <td th:text="${operation.operationsId}">1</td>
+                <td>
+                    <strong th:text="${operation.surname}">Иванов</strong><br>
+                    <span th:text="${operation.nameUser} + ' ' + ${operation.patronymic}">Петр Сергеевич</span>
+                </td>
+                <td class="amount" th:text="${#numbers.formatDecimal(operation.amount, 1, 2)} + ' ₽'">1000.00 ₽</td>
+                <td th:text="${operation.purpose}">Оплата услуг</td>
+                <td>
+                            <span class="card-number" th:text="${#strings.substring(operation.maskedCardNumber, 0, 4) + ' **** **** ' + #strings.substring(operation.maskedCardNumber, #strings.length(operation.maskedCardNumber)-4)}">
+                                1234 **** **** 5678
+                            </span>
+                </td>
+                <td>
+                    <span th:class="'status ' + (${operation.status} == 'SUCCESS' ? 'status-success' : (${operation.status} == 'PENDING' ? 'status-pending' : 'status-failed'))"
+                          th:text="${operation.status}">
+                        SUCCESS
+                    </span>
+                </td>
+                <td th:text="${#temporals.format(operation.createdAt, 'dd.MM.yyyy HH:mm')}">18.11.2025 20:00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Сообщение при отсутствии данных -->
+    <div th:if="${operations} and ${operations.size()} == 0" class="no-data">
+        <div>📭</div>
+        <h3>Операций не найдено</h3>
+        <p>Здесь будут отображаться все платежные операции</p>
+        <a href="/payment-form/demo" class="back-btn" style="margin-top: 20px;">
+            Создать тестовую операцию
+        </a>
+    </div>
+</div>
+
+<script>
+    // Автоматическое обновление страницы каждые 30 секунд
+    setTimeout(function() {
+        window.location.reload();
+    }, 30000);
+
+    // Подсветка строк при наведении
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.operations-table tr');
+        rows.forEach(row => {
+            row.addEventListener('click', function() {
+                this.style.backgroundColor = '#e3f2fd';
+                setTimeout(() => {
+                    this.style.backgroundColor = '';
+                }, 1000);
+            });
+        });
+    });
+</script>
+</body>
+</html>

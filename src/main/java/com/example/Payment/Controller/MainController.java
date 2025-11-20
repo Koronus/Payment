@@ -1,55 +1,61 @@
 package com.example.Payment.Controller;
 
-import com.example.Payment.Service.UserService;
-import com.example.Payment.Tables.User;
+import com.example.Payment.Dto.OperationResponseDTO;
+import com.example.Payment.Service.OperationService;
+import com.example.Payment.Tables.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
+@RequestMapping("/")
 public class MainController {
 
+    private final OperationService operationService;
+
+    // Используем конструктор вместо @Autowired на поле (рекомендуемый способ)
     @Autowired
-    private UserService userService;
-
-    @GetMapping("/view")
-    public String index(Model model){
-        model.addAttribute("users", userService.getAllUsers());
-        return "Main-List";
+    public MainController(OperationService operationService) {
+        this.operationService = operationService;
     }
 
-    @GetMapping("/registration")
-    public String viewProfile(Model model){
-        model.addAttribute("user", new User());
-        return "View-Form";
+    // Главная страница
+    @GetMapping
+    public String home(Model model) {
+        model.addAttribute("message", "Платежный сервис работает!");
+        return "home";
     }
 
+    // Страница со списком операций
+    @GetMapping("/operations")
+    public String getAllOperations(Model model) {
+        try {
+            List<OperationResponseDTO> operations = operationService.getAllOperations();
+            model.addAttribute("operations", operations);
 
-    @PostMapping("/save")
-    public String saveUser(@ModelAttribute("user") User user){
-        userService.saveUser(user);
-        return "redirect:/view"; // Перенаправляем на главную страницу
+            // Статистика
+            long total = operations.size();
+            long success = operations.stream().filter(op -> "SUCCESS".equals(op.getStatus())).count();
+            long failed = operations.stream().filter(op -> "FAILED".equals(op.getStatus())).count();
+
+            model.addAttribute("totalOperations", total);
+            model.addAttribute("successOperations", success);
+            model.addAttribute("failedOperations", failed);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Ошибка при загрузке операций: " + e.getMessage());
+        }
+
+        return "operations";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id) {
-        userService.deleteUser(id);
-        return "redirect:/view";
-    }
-
-
-    @GetMapping("/toggle-status/{id}")
-    public String toggleStatus(@PathVariable("id") Long id){
-        User user = userService.getUserById(id);
-        user.setCompleted(!user.isCompleted());
-        userService.saveUser(user);
-        return "redirect:/";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editUser(@PathVariable("id") Long id, Model model){
-        model.addAttribute("user", userService.getUserById(id));
-        return "View-Form";
+    // API endpoint для получения операций (если нужен JSON)
+    @GetMapping("/api/operations")
+    @ResponseBody
+    public List<OperationResponseDTO> getOperationsApi() {
+        return operationService.getAllOperations();
     }
 }

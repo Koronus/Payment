@@ -1,0 +1,50 @@
+package com.example.Payment.Dto;
+
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
+
+public class OperationCreateRequestDTO {
+
+    @NotBlank(message = "Фамилия обязательна")
+    @Size(max = 50, message = "Фамилия не должна превышать 50 символов")
+    private String surname;
+
+    @NotBlank(message = "Имя обязательно")
+    @Size(max = 50, message = "Имя не должно превышать 50 символов")
+    private String nameUser;
+
+    @Size(max = 50, message = "Отчество не должно превышать 50 символов")
+    private String patronymic;
+
+    @NotNull(message = "Сумма обязательна")
+    @DecimalMin(value = "0.01", message = "Сумма должна быть больше 0")
+    @Digits(integer = 10, fraction = 2, message = "Неверный формат суммы")
+    private BigDecimal amount;
+
+    @NotBlank(message = "Назначение платежа обязательно")
+    @Size(max = 255, message = "Назначение платежа не должно превышать 255 символов")
+    private String purpose;
+
+    @NotBlank(message = "Номер карты обязателен")
+    @Pattern(regexp = "^[0-9]{16,19}$", message = "Неверный формат номера карты")
+    private String cardNumber;
+
+    // Геттеры и сеттеры
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
+
+    public String getNameUser() { return nameUser; }
+    public void setNameUser(String nameUser) { this.nameUser = nameUser; }
+
+    public String getPatronymic() { return patronymic; }
+    public void setPatronymic(String patronymic) { this.patronymic = patronymic; }
+
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+
+    public String getPurpose() { return purpose; }
+    public void setPurpose(String purpose) { this.purpose = purpose; }
+
+    public String getCardNumber() { return cardNumber; }
+    public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+}

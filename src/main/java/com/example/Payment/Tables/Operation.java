@@ -3,52 +3,91 @@ package com.example.Payment.Tables;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Operations") // Указываем имя таблицы в БД
+@Table(name = "operations") // Сущность мапится на СУЩЕСТВУЮЩУЮ таблицу
 public class Operation {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "operation_seq")
-    @SequenceGenerator(name = "operation_seq", sequenceName = "operation_id_seq", allocationSize = 1)
-    @Column(name = "Operations_ID")
-    private Long Operations_ID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "operations_id", insertable = false) // Маппинг на существующий столбец
+    private Integer operations_Id;
 
-    @Column(name = "amount",  precision = 10, scale = 2)
-    private BigDecimal amount;              //BigDecimal для денежных сумм
+    @Column(name = "surname") // Маппинг на существующий столбец
+    private String surname;
 
-    @Column(name = "purpose", length = 255)
+    @Column(name = "name_user") // Маппинг на существующий столбец
+    private String name_user;
+
+    @Column(name = "patronymic") // Маппинг на существующий столбец
+    private String patronymic;
+
+    @Column(name = "amount") // Маппинг на существующий столбец
+    private BigDecimal amount;
+
+    @Column(name = "purpose") // Маппинг на существующий столбец
     private String purpose;
 
-    @Column(name = "created_at", length = 255)
-    private String created_at;
+    @Column(name = "card_number") // Маппинг на существующий столбец
+    private String card_number;
 
+    @Column(name = "status") // Маппинг на существующий столбец
+    private String status;
 
+    @Column(name = "created_at") // Маппинг на существующий столбец
+    private LocalDateTime created_at;
 
-    @Column(name = "User_ID", length = 255)
-    private Long userID;
 
     // Конструкторы
     public Operation() {
         // Пустой конструктор обязателен для JPA
     }
 
-    public Operation(Long Operations_ID, BigDecimal amount, String purpose, String created_at, Long userID) {
-        this.Operations_ID = Operations_ID;
+
+    public Operation(Integer Operations_ID, String surname, String name_user, String patronymic, BigDecimal amount, String purpose, String card_number, String status, LocalDateTime created_at) {
+        this.operations_Id = operations_Id;
+        this.surname = surname;
+        this.name_user = name_user;
+        this.patronymic = patronymic;
         this.amount = amount;
-        this.purpose = purpose;
-        this.created_at = created_at;
-        this.userID = userID;
+        this.purpose=purpose;
+        this.card_number=card_number;
+        this.status=status;
+        this.created_at=created_at;
     }
 
     // Геттеры и сеттеры
 
-    public Long getOperations_ID() {
-        return Operations_ID;
+    public Integer getOperations_Id() {
+        return operations_Id;
     }
 
-    public void setOperations_ID(Long operations_ID) {
-        Operations_ID = operations_ID;
+    public void setOperations_Id(Integer operations_Id) {
+        this.operations_Id = operations_Id;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getName_user() {
+        return name_user;
+    }
+
+    public void setName_user(String name_user) {
+        this.name_user = name_user;
+    }
+
+    public String getPatronymic() {
+        return patronymic;
+    }
+
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
     }
 
     public BigDecimal getAmount() {
@@ -67,31 +106,31 @@ public class Operation {
         this.purpose = purpose;
     }
 
-    public String getCreated_at() {
+    public String getCard_number() {
+        return card_number;
+    }
+
+    public void setCard_number(String card_number) {
+        this.card_number = card_number;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreated_at() {
         return created_at;
     }
 
-    public void setCreated_at(String created_at) {
+    public void setCreated_at(LocalDateTime created_at) {
         this.created_at = created_at;
     }
 
-    public Long getUser_ID() {
-        return userID;
-    }
 
-    public void setUser_ID(Long user_ID) {
-        userID = user_ID;
-    }
 
-    // toString метод для удобства отладки
-    @Override
-    public String toString() {
-        return "Operation{" +
-                "Operations_ID=" + Operations_ID +
-                ", amount='" + amount + '\'' +
-                ", purpose='" + purpose + '\'' +
-                ", created_at='" + created_at + '\'' +
-                ", User_ID='" + userID+ '\'' +
-                '}';
-    }
+
 }

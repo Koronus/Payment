@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Платежный сервис</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .menu a {
+            display: block;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .menu a:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏦 Платежный сервис</h1>
+
+    <div class="status" th:text="${message}">Система работает нормально</div>
+
+    <div class="menu">
+        <a href="/payment-form/demo">📝 Демо платежной формы</a>
+        <a href="/operations">📋 Список операций</a>
+        <a href="/api/operations">🔧 API операций (JSON)</a>
+    </div>
+
+    <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+        <h3>Для интеграции с внешними сайтами:</h3>
+        <p>Используйте REST API endpoints:</p>
+        <ul>
+            <li><code>POST /api/payments/init</code> - инициализация платежа</li>
+            <li><code>POST /api/payments/process</code> - обработка платежа</li>
+            <li><code>GET /api/operations/{id}</code> - статус операции</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

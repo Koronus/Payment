@@ -1,12 +1,14 @@
 package com.example.Payment.Service;
 
 
+//import com.example.Payment.Dto.UserDto;
 import com.example.Payment.Repository.UserRepository;
 import com.example.Payment.Tables.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -20,7 +22,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id){
+    public User getUserById(UUID id){
        return userRepository.findById(id).orElse(null);
     }
 
@@ -28,7 +30,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void deleteUser(Long id){
+    public void deleteUser(UUID id){
         userRepository.deleteById(id);
     }
 }
