@@ -17,7 +17,7 @@ public class Operation {
     private String surname;
 
     @Column(name = "name_user") // Маппинг на существующий столбец
-    private String name_user;
+    private String nameUser;
 
     @Column(name = "patronymic") // Маппинг на существующий столбец
     private String patronymic;
@@ -37,6 +37,12 @@ public class Operation {
     @Column(name = "created_at") // Маппинг на существующий столбец
     private LocalDateTime created_at;
 
+    @Column(name = "error_reason") // Текст сообщения ошибки после попытки осуществить платеж
+    private String errorReason;
+
+    @Column(name = "error_code") // Код ошибки
+    private String errorCode;
+
 
     // Конструкторы
     public Operation() {
@@ -44,10 +50,15 @@ public class Operation {
     }
 
 
+    public Operation(String errorCode, String errorReason) {
+        this.errorCode = errorCode;
+        this.errorReason = errorReason;
+    }
+
     public Operation(Integer Operations_ID, String surname, String name_user, String patronymic, BigDecimal amount, String purpose, String card_number, String status, LocalDateTime created_at) {
-        this.operations_Id = operations_Id;
+        this.operations_Id = Operations_ID;
         this.surname = surname;
-        this.name_user = name_user;
+        this.nameUser = name_user;
         this.patronymic = patronymic;
         this.amount = amount;
         this.purpose=purpose;
@@ -74,12 +85,12 @@ public class Operation {
         this.surname = surname;
     }
 
-    public String getName_user() {
-        return name_user;
+    public String getNameUser() {
+        return nameUser;
     }
 
-    public void setName_user(String name_user) {
-        this.name_user = name_user;
+    public void setNameUser(String nameUser) {
+        this.nameUser = nameUser;
     }
 
     public String getPatronymic() {
@@ -130,7 +141,19 @@ public class Operation {
         this.created_at = created_at;
     }
 
+    public String getErrorReason() {
+        return errorReason;
+    }
 
+    public void setErrorReason(String errorReason) {
+        this.errorReason = errorReason;
+    }
 
+    public String getErrorCode() {
+        return errorCode;
+    }
 
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
 }

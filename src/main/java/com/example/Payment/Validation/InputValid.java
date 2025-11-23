@@ -1,19 +1,22 @@
-package com.example.Payment.Dto;
+package com.example.Payment.Validation;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
 
-public class OperationCreateRequestDTO {
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public class InputValid {
 
     @NotBlank(message = "Фамилия обязательна")
-    @Size(max = 50, message = "Фамилия не должна превышать 50 символов")
+    @Size(min = 2 , max = 50, message = "Фамилия не должна быть менше 2 символов и превышать 50 символов")
     private String surname;
 
     @NotBlank(message = "Имя обязательно")
-    @Size(max = 50, message = "Имя не должно превышать 50 символов")
+    @Size(min = 2, max = 50, message = "Имя не должно  быть менше 2 символов и превышать 50 символов")
     private String nameUser;
 
-    @Size(max = 50, message = "Отчество не должно превышать 50 символов")
+    @Size(min = 2, max = 50, message = "Отчество не должно  быть меньше 2 символов и превышать 50 символов")
     private String patronymic;
 
     @NotNull(message = "Сумма обязательна")
@@ -26,8 +29,20 @@ public class OperationCreateRequestDTO {
     private String purpose;
 
     @NotBlank(message = "Номер карты обязателен")
-    @Pattern(regexp = "^[0-9]{16,19}$", message = "Неверный формат номера карты")
+    @Pattern(regexp = "^[0-9\\s]{19}$", message = "Неверный формат номера карты")
     private String cardNumber;
+
+    @NotBlank(message = "Дата действия карты обязательна")
+    @Pattern(regexp = "^(0[1-9]|1[0-2])\\/(2[4-9]|[3-9][0-9])$", message = "Неверный формат даты действия карты")
+    private String dateOfAction;
+
+    @NotBlank(message = "CVV код обязателен")
+    @Pattern(regexp = "^[0-9]{3}$", message = "Неверный формат номера CVV")
+    private String cvvCode;
+
+    @Email
+    private String email;
+
 
     // Геттеры и сеттеры
     public String getSurname() { return surname; }
@@ -47,4 +62,28 @@ public class OperationCreateRequestDTO {
 
     public String getCardNumber() { return cardNumber; }
     public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDateOfAction() {
+        return dateOfAction;
+    }
+
+    public void setDateOfAction(String dateOfAction) {
+        this.dateOfAction = dateOfAction;
+    }
+
+    public String getCvvCode() {
+        return cvvCode;
+    }
+
+    public void setCvvCode(String cvvCode) {
+        this.cvvCode = cvvCode;
+    }
 }

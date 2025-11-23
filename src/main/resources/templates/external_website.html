@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DemoShop - Интеграция с платежным сервисом</title>
+    <style>
+        .product-card {
+            background: white;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
+            display:inline-block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .buy-button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .buy-button:hover { background: #45a049; }
+        .container{ text-align: center; padding: 20px; }
+        .success-page {
+            background: #d4edda;
+            padding: 30px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 1px solid #c3e6cb;
+        }
+        .success-title { color: #155724; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Главная страница с товарами -->
+        <div id="mainPage">
+            <h1>🛍️ DemoShop</h1>
+            
+            <div class="products">
+                <div class="product-card">
+                    <div class="product-title">Смартфон Premium - 25 000 ₽</div>
+                    <button class="buy-button" onclick="redirectToPayment(25000, 'Смартфон Premium')">
+                        Купить сейчас
+                    </button>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-title">Беспроводные наушники - 8 500 ₽</div>
+                    <button class="buy-button" onclick="redirectToPayment(8500, 'Беспроводные наушники')">
+                        Купить сейчас
+                    </button>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-title">Игровой ноутбук ASUS - 77 999 ₽</div>
+                    <button class="buy-button" onclick="redirectToPayment(77999, 'Игровой ноутбук ASUS')">
+                        Купить сейчас
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница успешной оплаты -->
+        <div id="successPage" style="display: none;">
+            <div class="success-page">
+                <h1 class="success-title">✅ Оплата прошла успешно!</h1>
+                <div id="paymentDetails"></div>
+                <button class="buy-button" onclick="goToMainPage()">Вернуться к покупкам</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ПРОСТАЯ ФУНКЦИЯ ПЕРЕНАПРАВЛЕНИЯ НА ПЛАТЕЖНУЮ ФОРМУ
+        function redirectToPayment(amount, product) {
+            const orderId = 'ORDER-' + Date.now();
+            const currentUrl = window.location.href.split('?')[0];
+            
+            const paymentUrl = 
+                `http://localhost:8080/payment-form/demo?` +
+                `amount=${amount}&` +
+                `product=${encodeURIComponent(product)}&` +
+                `order_id=${orderId}&` +
+                `return_url=${encodeURIComponent(currentUrl)}`;
+            
+            console.log('🎯 URL для перехода:', paymentUrl);
+            console.log('📋 Параметры:');
+            console.log('  - amount:', amount);
+            console.log('  - product:', product);
+            console.log('  - order_id:', orderId);
+            console.log('  - return_url:', currentUrl);
+            
+            // Проверяем перед переходом
+            if (!paymentUrl.includes('amount=') || !paymentUrl.includes('product=')) {
+                console.error('❌ ОШИБКА: Параметры не передаются в URL!');
+                return;
+            }
+            
+            window.location.href = paymentUrl;
+        }
+
+        // Показать страницу успеха
+        function showSuccessPage(paymentData) {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+            
+            document.getElementById('paymentDetails').innerHTML = `
+                <h3>Детали платежа:</h3>
+                <p><strong>Товар:</strong> ${paymentData.product}</p>
+                <p><strong>Сумма:</strong> ${paymentData.amount} ₽</p>
+                <p><strong>ID операции:</strong> ${paymentData.operation_id}</p>
+                <p><strong>Номер заказа:</strong> ${paymentData.order_id}</p>
+                <p><strong>Время:</strong> ${new Date().toLocaleString()}</p>
+            `;
+        }
+
+        // Возврат на главную
+        function goToMainPage() {
+            // Очищаем параметры URL
+            window.location.href = window.location.origin + window.location.pathname;
+        }
+
+        // Проверяем параметры URL при загрузке (для возврата из платежной формы)
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            console.log('Параметры URL:', Object.fromEntries(urlParams.entries()));
+            
+            if (urlParams.get('payment_status') === 'success') {
+                showSuccessPage({
+                    product: urlParams.get('product'),
+                    amount: urlParams.get('amount'),
+                    operation_id: urlParams.get('operation_id'),
+                    order_id: urlParams.get('order_id')
+                });
+            }
+        });
+    </script>
+</body>
+</html>

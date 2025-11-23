@@ -20,7 +20,7 @@ public class OperationResponseDTO {
     public OperationResponseDTO(Operation operation) {
         this.operationsId = operation.getOperations_Id();
         this.surname = operation.getSurname();
-        this.nameUser = operation.getName_user();
+        this.nameUser = operation.getNameUser();
         this.patronymic = operation.getPatronymic();
         this.amount = operation.getAmount();
         this.purpose = operation.getPurpose();

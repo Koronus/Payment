@@ -2,7 +2,6 @@ package com.example.Payment.Controller;
 
 import com.example.Payment.Dto.OperationResponseDTO;
 import com.example.Payment.Service.OperationService;
-import com.example.Payment.Tables.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,7 +15,7 @@ public class MainController {
 
     private final OperationService operationService;
 
-    // Используем конструктор вместо @Autowired на поле (рекомендуемый способ)
+    // Используем конструктор вместо @Autowired на поле
     @Autowired
     public MainController(OperationService operationService) {
         this.operationService = operationService;
@@ -29,7 +28,7 @@ public class MainController {
         return "home";
     }
 
-    // Страница со списком операций
+//    // Страница со списком операций
     @GetMapping("/operations")
     public String getAllOperations(Model model) {
         try {

@@ -1,10 +1,12 @@
 package com.example.Payment.Dto.Mapping;
 
 
-import com.example.Payment.Dto.OperationCreateRequestDTO;
+//import com.example.Payment.Dto.OperationCreateRequestDTO;
+//import com.example.Payment.Dto.OperationResponseDTO;
+//import com.example.Payment.Dto.OperationStatusDTO;
 import com.example.Payment.Dto.OperationResponseDTO;
-import com.example.Payment.Dto.OperationStatusDTO;
 import com.example.Payment.Tables.Operation;
+import com.example.Payment.Validation.InputValid;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -12,10 +14,10 @@ import java.time.LocalDateTime;
 @Component
 public class OperationMapper {
 
-    public Operation toEntity(OperationCreateRequestDTO dto) {
+    static  public Operation toEntity(InputValid dto) {
         Operation operation = new Operation();
         operation.setSurname(dto.getSurname());
-        operation.setName_user(dto.getNameUser());
+        operation.setNameUser(dto.getNameUser());
         operation.setPatronymic(dto.getPatronymic());
         operation.setAmount(dto.getAmount());
         operation.setPurpose(dto.getPurpose());
@@ -28,8 +30,8 @@ public class OperationMapper {
     public OperationResponseDTO toResponseDTO(Operation operation) {
         return new OperationResponseDTO(operation);
     }
-
-    public OperationStatusDTO toStatusDTO(Operation operation) {
-        return new OperationStatusDTO(operation);
-    }
+//
+//    public OperationStatusDTO toStatusDTO(Operation operation) {
+//        return new OperationStatusDTO(operation);
+//    }
 }
