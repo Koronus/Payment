@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 public class InputValid {
 
     @NotBlank(message = "Фамилия обязательна")
-    @Size(min = 2 , max = 50, message = "Фамилия не должна быть менше 2 символов и превышать 50 символов")
+    @Size(min = 2 , max = 50, message = "Фамилия не должна быть меньше 2 символов и превышать 50 символов")
     private String surname;
 
     @NotBlank(message = "Имя обязательно")
-    @Size(min = 2, max = 50, message = "Имя не должно  быть менше 2 символов и превышать 50 символов")
+    @Size(min = 2, max = 50, message = "Имя не должно  быть меньше 2 символов и превышать 50 символов")
     private String nameUser;
 
     @Size(min = 2, max = 50, message = "Отчество не должно  быть меньше 2 символов и превышать 50 символов")
@@ -29,7 +29,7 @@ public class InputValid {
     private String purpose;
 
     @NotBlank(message = "Номер карты обязателен")
-    @Pattern(regexp = "^[0-9\\s]{19}$", message = "Неверный формат номера карты")
+    @Pattern(regexp = "^[0-9\\s]{16,19}$", message = "Неверный формат номера карты")
     private String cardNumber;
 
     @NotBlank(message = "Дата действия карты обязательна")
