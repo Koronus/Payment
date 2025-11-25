@@ -4,7 +4,6 @@ import com.example.Payment.Dto.Mapping.OperationMapper;
 import com.example.Payment.Dto.OperationResponseDTO;
 import com.example.Payment.Repository.OperationRepository;
 import com.example.Payment.Tables.Operation;
-import com.example.Payment.Validation.InputValid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

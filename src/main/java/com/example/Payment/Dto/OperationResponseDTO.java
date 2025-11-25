@@ -15,6 +15,7 @@ public class OperationResponseDTO {
     private String maskedCardNumber; // Маскированный номер карты для безопасности
     private String status;
     private LocalDateTime createdAt;
+    private String errorReason;
 
     // Конструктор из Entity
     public OperationResponseDTO(Operation operation) {
@@ -44,4 +45,8 @@ public class OperationResponseDTO {
     public String getMaskedCardNumber() { return maskedCardNumber; }
     public String getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public String getErrorReason() {
+        return errorReason;
+    }
 }

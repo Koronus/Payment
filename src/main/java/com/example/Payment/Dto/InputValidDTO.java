@@ -1,12 +1,10 @@
-package com.example.Payment.Validation;
+package com.example.Payment.Dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
-public class InputValid {
+public class InputValidDTO {
 
     @NotBlank(message = "Фамилия обязательна")
     @Size(min = 2 , max = 50, message = "Фамилия не должна быть меньше 2 символов и превышать 50 символов")

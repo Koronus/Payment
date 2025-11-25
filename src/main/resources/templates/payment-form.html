@@ -243,6 +243,7 @@
         const successPopup = document.getElementById('successPopup');
         const returnToSiteBtn = document.getElementById('returnToSiteBtn');
         const urlParams = new URLSearchParams(window.location.search);
+        const formData = new FormData(form);
 
         // 🔧 АВТОЗАПОЛНЕНИЕ ПОЛЕЙ ИЗ URL ПАРАМЕТРОВ
         console.log('🔍 Параметры URL:', Object.fromEntries(urlParams.entries()));
@@ -281,6 +282,11 @@
             e.target.value = value.substring(0, 5);
             validateExpiryDate(e.target);
         });
+
+
+
+//Ошибка при обработке платежа
+        
 
         // Функция валидации срока действия
         function validateExpiryDate(input) {
@@ -350,12 +356,14 @@
         }
 
         // Обработка отправки формы
+        // Обработка отправки формы
         document.getElementById('paymentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             try {
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Обработка...';
+                resultDiv.style.display = 'none';
 
                 const formData = new FormData(this);
                 console.log('Отправляемые данные:');
@@ -368,14 +376,34 @@
                     body: formData
                 });
 
-                console.log('HTTP статус:', response.status);
-                const responseData = await response.json();
-                console.log('Полный ответ сервера:', responseData);
+                console.log('🔍 ОТЛАДКА - HTTP статус:', response.status);
 
-                if (!response.ok) {
-                    handleValidationErrors(responseData);
+                const responseText = await response.text();
+                console.log('🔍 ОТЛАДКА - Ответ сервера (текст):', responseText);
+
+                // Пробуем распарсить JSON
+                let responseData;
+                try {
+                    responseData = JSON.parse(responseText);
+                    console.log('🔍 ОТЛАДКА - Ответ сервера (JSON):', responseData);
+                } catch (e) {
+                    console.error('🔍 ОТЛАДКА - Ошибка парсинга JSON:', e);
+                    responseData = { error: 'Неверный формат ответа' };
+                }
+
+                // 🔥 ВРЕМЕННО: Принудительно показываем разные сценарии для теста
+                const testRandom = Math.random();
+                console.log('🔍 ТЕСТ - Случайное число:', testRandom);
+
+                if (testRandom < 0.5) {
+                    console.log('🧪 ТЕСТ: Показываем УСПЕХ');
+                    showSuccessPopup();
+                } else if (testRandom < 0.7) {
+                    console.log('🧪 ТЕСТ: Показываем ОШИБКУ 1');
+                    showErrorMessage('❌ ТЕСТ: Недостаточно средств на карте');
                 } else {
-                    handleSuccessResponse(responseData);
+                    console.log('🧪 ТЕСТ: Показываем ОШИБКУ 2');
+                    showErrorMessage('❌ ТЕСТ: Карта заблокирована');
                 }
 
             } catch (error) {
@@ -401,18 +429,7 @@
             }
         }
 
-        // В обработчике успешной оплаты
-        function handleSuccessResponse(responseData) {
-            console.log('Успешный ответ:', responseData);
 
-            if (responseData.status === 'SUCCESS') {
-                showSuccessPopup();
-                document.getElementById('paymentForm').reset();
-                sendCallbackNotification(responseData);
-            } else if (responseData.status === 'FAILED') {
-                showErrorMessage('Ошибка при обработке платежа');
-            }
-        }
 
         // Функция отправки callback уведомления
         async function sendCallbackNotification(paymentData) {
