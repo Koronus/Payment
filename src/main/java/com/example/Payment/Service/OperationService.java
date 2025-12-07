@@ -3,14 +3,16 @@ package com.example.Payment.Service;
 import com.example.Payment.Dto.Mapping.OperationMapper;
 import com.example.Payment.Dto.OperationResponseDTO;
 import com.example.Payment.Repository.OperationRepository;
-import com.example.Payment.Tables.Operation;
+import com.example.Payment.Entity.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OperationService {
 
     @Autowired

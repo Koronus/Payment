@@ -38,6 +38,11 @@ public class InputValidDTO {
     @Pattern(regexp = "^[0-9]{3}$", message = "Неверный формат номера CVV")
     private String cvvCode;
 
+
+    private String errorCode;
+
+    private String errorReason;
+
     @Email
     private String email;
 
@@ -83,5 +88,21 @@ public class InputValidDTO {
 
     public void setCvvCode(String cvvCode) {
         this.cvvCode = cvvCode;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorReason() {
+        return errorReason;
+    }
+
+    public void setErrorReason(String errorReason) {
+        this.errorReason = errorReason;
     }
 }

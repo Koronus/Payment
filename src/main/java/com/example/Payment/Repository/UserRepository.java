@@ -1,6 +1,6 @@
 package com.example.Payment.Repository;
 
-import com.example.Payment.Tables.User;
+import com.example.Payment.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

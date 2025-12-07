@@ -183,12 +183,12 @@
 
         <div class="form-group">
             <label for="amount">Сумма</label>
-            <input type="number" id="amount" name="amount" step="0.01" th:value="${amount}" readonly>
+            <input type="number" id="amount" name="amount" step="0.01" th:value="${amount}" required>
         </div>
 
         <div class="form-group">
             <label for="purpose">Назначение платежа</label>
-            <input type="text" id="purpose" name="purpose" th:value="${purpose}" readonly>
+            <input type="text" id="purpose" name="purpose" th:value="${purpose}" required>
         </div>
 
         <div class="form-group">
@@ -286,7 +286,7 @@
 
 
 //Ошибка при обработке платежа
-        
+
 
         // Функция валидации срока действия
         function validateExpiryDate(input) {

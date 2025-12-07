@@ -1,4 +1,4 @@
-package com.example.Payment.Tables;
+package com.example.Payment.Entity;
 
 import jakarta.persistence.*;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class Operation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "operations_id", insertable = false) // Маппинг на существующий столбец
+    @Column(name = "operations_id") // Маппинг на существующий столбец
     private Integer operations_Id;
 
     @Column(name = "surname") // Маппинг на существующий столбец

@@ -1,6 +1,6 @@
 package com.example.Payment.Dto;
 
-import com.example.Payment.Tables.Operation;
+import com.example.Payment.Entity.Operation;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

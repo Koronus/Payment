@@ -3,7 +3,7 @@ package com.example.Payment.Service;
 
 //import com.example.Payment.Dto.UserDto;
 import com.example.Payment.Repository.UserRepository;
-import com.example.Payment.Tables.User;
+import com.example.Payment.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

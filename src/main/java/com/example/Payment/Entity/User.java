@@ -1,4 +1,4 @@
-package com.example.Payment.Tables;
+package com.example.Payment.Entity;
 
 import jakarta.persistence.*;
 
