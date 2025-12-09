@@ -1,0 +1,77 @@
+/* Общие стили */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+}
+
+/* Центрирование контента на странице */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Центрирование по вертикали на весь экран */:contentReference[oaicite:12]{index=12}
+}
+
+/* Карточка формы */
+.form-box {
+  background-color: #fff;
+  padding: 2em;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);  /* мягкая тень */:contentReference[oaicite:13]{index=13}
+  text-align: center;
+  max-width: 300px;
+  width: 90%;
+}
+
+/* Заголовок и текст внутри формы */
+.form-box h2 {
+  margin-bottom: 0.5em;
+}
+.form-box p {
+  margin-bottom: 1em;
+  color: #333;
+}
+
+/* Поле ввода OTP-кода */
+#otp-input {
+  font-size: 1.5rem;
+  text-align: center;
+  letter-spacing: 0.2em;  /* немного разрядки между цифрами */
+  padding: 0.5em;
+  width: 150px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 1em;
+}
+
+/* Кнопка подтверждения */
+#otp-form button {
+  background-color: #4CAF50; /* зеленый фон кнопки */:contentReference[oaicite:14]{index=14}
+  color: #fff;
+  border: none;
+  padding: 0.6em 1.2em;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#otp-form button:hover {
+  background-color: #45a049; /* темно-зеленый при наведении */:contentReference[oaicite:15]{index=15}
+}
+
+/* Сообщение об ошибке */
+.status-message {
+  margin-top: 0.5em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.status-message.success {
+  color: #28a745; /* зелёный */
+}
+
+.status-message.error {
+  color: #e74c3c; /* красный */
+}
+

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Подтверждение оплаты</title>
+    <link rel="stylesheet" href="/css/SMS.css" />
+</head>
+<body>
+<div class="container">
+    <div class="form-box">
+        <h2>Подтверждение оплаты</h2>
+        <p>Введите 4-значный код из SMS:</p>
+        <form id="otp-form">
+            <input id="otp-input"
+                   type="text"
+                   inputmode="numeric"
+                   autocomplete="one-time-code"
+                   maxlength="4" pattern="\d{4}" required />
+            <button type="submit">Подтвердить</button>
+        </form>
+        <p id="statusMsg" class="status-message"></p>
+    </div>
+</div>
+<script src="/js/SMS.js"></script>
+</body>
+</html>

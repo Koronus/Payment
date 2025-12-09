@@ -73,26 +73,43 @@
             text-align: center;
             padding: 10px;
         }
+        .back-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 <body>
 <div class="payment-form">
     <h2>Оплата</h2>
 
-      <form id="paymentForm" action="/payment-form/process" method="post">
+    <form id="paymentForm" th:action="@{/payment-form/otp}" method="post">
         <div class="form-group">
             <label for="surname">Фамилия</label>
-            <input type="text" id="surname" name="surname" placeholder="Иванов" required>
+            <input type="text" id="surname" name="surname"
+                   placeholder="Иванов" th:value="${surname}" required>
         </div>
 
         <div class="form-group">
             <label for="nameUser">Имя</label>
-            <input type="text" id="nameUser" name="nameUser" placeholder="Иван" required>
+            <input type="text" id="nameUser" name="nameUser"
+                   placeholder="Иван" th:value="${nameUser}" required>
         </div>
 
         <div class="form-group">
             <label for="patronymic">Отчество</label>
-            <input type="text" id="patronymic" name="patronymic" placeholder="Иванович">
+            <input type="text" id="patronymic" name="patronymic"
+                   placeholder="Иванович" th:value="${patronymic}">
         </div>
 
         <div class="form-group">
@@ -107,24 +124,31 @@
 
         <div class="form-group">
             <label for="cardNumber">Номер карты</label>
-            <input type="text" id="cardNumber" name="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
+            <input type="text" id="cardNumber" name="cardNumber"
+                   placeholder="0000 0000 0000 0000"
+                   maxlength="19" th:value="${cardNumber}" required>
         </div>
 
         <div class="card-group">
             <div class="form-group">
                 <label for="expiryDate">Срок действия</label>
-                <input type="text" id="expiryDate" placeholder="ММ/ГГ" maxlength="5" required>
+                <input type="text" id="expiryDate" placeholder="ММ/ГГ"
+                       maxlength="5" th:value="${expiryDate}" required>
+
             </div>
 
             <div class="form-group">
                 <label for="cvv">CVV</label>
-                <input type="text" id="cvv" placeholder="000" maxlength="3" required>
+                <input type="text" id="cvv" placeholder="000"
+                       maxlength="3" th:value="${cvv}" required>
             </div>
         </div>
 
         <div class="form-group">
             <label for="email">Email для чека</label>
-            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            <input type="email" id="email" name="email"
+                   placeholder="your@email.com"
+                   th:value="${email}" required>
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">
@@ -132,7 +156,26 @@
         </button>
     </form>
 
-    <div id="resultMessage"></div>
+    <button type="button"
+            class="back-btn"
+            onclick="window.location.href='/'">
+        Вернуться на главную
+    </button>
+
+    <div id="resultMessage">
+        <div th:if="${paymentStatus} == 'success'"
+             style="color: green; padding: 15px; background: #d4edda; border-radius: 5px; margin-top: 15px;">
+            <h3>✅ Платеж успешно обработан</h3>
+            <p th:text="'ID операции: ' + ${paymentOperationId}"></p>
+            <p th:text="${paymentMessage}"></p>
+        </div>
+
+        <div th:if="${paymentStatus} == 'error'"
+             style="color: red; padding: 15px; background: #f8d7da; border-radius: 5px; margin-top: 15px;">
+            <h3>❌ Ошибка при обработке платежа</h3>
+            <p th:text="${paymentMessage}"></p>
+        </div>
+    </div>
 </div>
 
 <script src="payment-widget.js"></script>
@@ -160,61 +203,7 @@
         });
 
         // Обработка отправки формы
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
 
-            // Показываем загрузку
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Обработка...';
-            resultDiv.innerHTML = '';
-
-            try {
-                // Собираем данные формы
-                const formData = new FormData(form);
-
-                // Добавляем поля, которых нет в форме но нужны для эмуляции
-                formData.append('expiryDate', document.getElementById('expiryDate').value);
-                formData.append('cvv', document.getElementById('cvv').value);
-
-                // Отправляем запрос
-                const response = await fetch('/payment-form/process', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    resultDiv.innerHTML = `
-                        <div style="color: green; padding: 15px; background: #d4edda; border-radius: 5px;">
-                            <h3>✅ Платеж успешно обработан!</h3>
-                            <p>ID операции: ${result.operationId}</p>
-                            <p>${result.message}</p>
-                        </div>
-                    `;
-                    form.style.display = 'none'; // Скрываем форму после успеха
-                } else {
-                    resultDiv.innerHTML = `
-                        <div style="color: red; padding: 15px; background: #f8d7da; border-radius: 5px;">
-                            <h3>❌ Ошибка</h3>
-                            <p>${result.message}</p>
-                        </div>
-                    `;
-                }
-
-            } catch (error) {
-                resultDiv.innerHTML = `
-                    <div style="color: red; padding: 15px; background: #f8d7da; border-radius: 5px;">
-                        <h3>❌ Ошибка соединения</h3>
-                        <p>Попробуйте еще раз</p>
-                    </div>
-                `;
-            } finally {
-                // Восстанавливаем кнопку
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Оплатить';
-            }
-        });
     });
 </script>
 

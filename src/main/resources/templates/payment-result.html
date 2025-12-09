@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат платежа</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .result-box {
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,.1);
+            text-align: center;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 18px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button-main {
+            background: #007bff;
+            color: #fff;
+        }
+        .button-main:hover {
+            background: #0069d9;
+        }
+    </style>
+</head>
+<body>
+<div class="result-box">
+    <h2 th:if="${paymentStatus} == 'success'"
+        class="success">Платёж выполнен</h2>
+    <h2 th:if="${paymentStatus} == 'error'"
+        class="error">Платёж не выполнен</h2>
+
+    <p th:text="${paymentMessage}"></p>
+
+    <p th:if="${paymentOperationId != null}">
+        ID операции:
+        <span th:text="${paymentOperationId}"></span>
+    </p>
+
+    <button class="button button-main"
+            onclick="window.location.href='/'">
+        Вернуться на главную
+    </button>
+</div>
+</body>
+</html>
