@@ -2,6 +2,7 @@ package com.example.Payment.Dto;
 
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class OperationCreateRequestDTO {
 
@@ -26,8 +27,12 @@ public class OperationCreateRequestDTO {
     private String purpose;
 
     @NotBlank(message = "Номер карты обязателен")
-    @Pattern(regexp = "^[0-9]{16,19}$", message = "Неверный формат номера карты")
+    @Pattern(regexp = "^(\\d[ ]*){16,19}$", message = "Неверный формат номера карты")
     private String cardNumber;
+
+    private String status;
+
+    public LocalDateTime createdAt;
 
     // Геттеры и сеттеры
     public String getSurname() { return surname; }
@@ -47,4 +52,21 @@ public class OperationCreateRequestDTO {
 
     public String getCardNumber() { return cardNumber; }
     public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

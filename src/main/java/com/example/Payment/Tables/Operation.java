@@ -1,5 +1,6 @@
 package com.example.Payment.Tables;
 
+import com.example.Payment.Converter.SecureCardNumberConverter;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -22,13 +23,14 @@ public class Operation {
     @Column(name = "patronymic") // Маппинг на существующий столбец
     private String patronymic;
 
-    @Column(name = "amount") // Маппинг на существующий столбец
+    @Column(name = "amount", precision = 19, scale = 2) // Маппинг на существующий столбец
     private BigDecimal amount;
 
     @Column(name = "purpose") // Маппинг на существующий столбец
     private String purpose;
 
     @Column(name = "card_number") // Маппинг на существующий столбец
+    @Convert(converter = SecureCardNumberConverter.class) // ← ЭТА АННОТАЦИЯ ОБЯЗАТЕЛЬНА!
     private String card_number;
 
     @Column(name = "status") // Маппинг на существующий столбец

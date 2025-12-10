@@ -1,20 +1,26 @@
 package com.example.Payment.Controller;
 
+import com.example.Payment.Dto.Mapping.OperationMapper;
+import com.example.Payment.Dto.OperationCreateRequestDTO;
 import com.example.Payment.Service.OperationService;
 import com.example.Payment.Tables.Operation;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/payment-form")
@@ -22,6 +28,9 @@ public class PaymentFormController {
 
     @Autowired
     private OperationService operationService;
+
+    @Autowired
+    private OperationMapper operationMapper;
 
     // ====== 1. Показ формы оплаты (GET /payment-form) ======
     @GetMapping
@@ -205,25 +214,28 @@ public class PaymentFormController {
     // Можно оставить на всякий случай, он никому не мешает.
     @PostMapping("/process")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> processPayment(
-            @RequestParam String surname,
-            @RequestParam String nameUser,
-            @RequestParam String patronymic,
-            @RequestParam String amount,
-            @RequestParam String purpose,
-            @RequestParam String cardNumber,
-            @RequestParam String email) {
+    public ResponseEntity<?> processPayment(
+            @Valid @ModelAttribute OperationCreateRequestDTO operationCreateRequestDTO  , // ← @Valid здесь!
+            BindingResult bindingResult) { // ← BindingResult для ошибок
+
+        // Проверяем ошибки валидации
+        if (bindingResult.hasErrors()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "validation_error");
+            response.put("message", "Ошибки валидации");
+
+            // Собираем все ошибки
+            List<String> errors = bindingResult.getFieldErrors().stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                    .collect(Collectors.toList());
+            response.put("errors", errors);
+
+            return ResponseEntity.badRequest().body(response);
+        }
 
         try {
-            Operation operation = new Operation();
-            operation.setSurname(surname);
-            operation.setName_user(nameUser);
-            operation.setPatronymic(patronymic);
-            operation.setAmount(new BigDecimal(amount));
-            operation.setPurpose(purpose);
-            operation.setCard_number(cardNumber);
-            operation.setStatus("PENDING");
-            operation.setCreated_at(LocalDateTime.now());
+
+            Operation operation = operationMapper.toEntity(operationCreateRequestDTO);
 
             Operation savedOperation = operationService.save(operation);
             System.out.println("Создана операция с ID: " + savedOperation.getOperations_Id());
