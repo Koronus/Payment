@@ -14,9 +14,7 @@ public class OperationMapper {
 
     public Operation toEntity(OperationCreateRequestDTO dto) {
         Operation operation = new Operation();
-        operation.setSurname(dto.getSurname());
-        operation.setName_user(dto.getNameUser());
-        operation.setPatronymic(dto.getPatronymic());
+        operation.setCardholderName(dto.getCardholderName());
         operation.setAmount(dto.getAmount());
         operation.setPurpose(dto.getPurpose());
         operation.setCard_number(dto.getCardNumber());

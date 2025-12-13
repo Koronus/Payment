@@ -14,14 +14,8 @@ public class Operation {
     @Column(name = "operations_id", insertable = false) // Маппинг на существующий столбец
     private Integer operations_Id;
 
-    @Column(name = "surname") // Маппинг на существующий столбец
-    private String surname;
-
-    @Column(name = "name_user") // Маппинг на существующий столбец
-    private String name_user;
-
-    @Column(name = "patronymic") // Маппинг на существующий столбец
-    private String patronymic;
+    @Column(name = "cardholder_name") // Маппинг на существующий столбец
+    private String cardholderName;
 
     @Column(name = "amount", precision = 19, scale = 2) // Маппинг на существующий столбец
     private BigDecimal amount;
@@ -46,11 +40,9 @@ public class Operation {
     }
 
 
-    public Operation(Integer Operations_ID, String surname, String name_user, String patronymic, BigDecimal amount, String purpose, String card_number, String status, LocalDateTime created_at) {
+    public Operation(Integer Operations_ID, String cardholderName, BigDecimal amount, String purpose, String card_number, String status, LocalDateTime created_at) {
         this.operations_Id = operations_Id;
-        this.surname = surname;
-        this.name_user = name_user;
-        this.patronymic = patronymic;
+        this.cardholderName = cardholderName;
         this.amount = amount;
         this.purpose=purpose;
         this.card_number=card_number;
@@ -68,28 +60,12 @@ public class Operation {
         this.operations_Id = operations_Id;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getCardholderName() {
+        return cardholderName;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getName_user() {
-        return name_user;
-    }
-
-    public void setName_user(String name_user) {
-        this.name_user = name_user;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
+    public void setCardholderName(String cardholderName) {
+        this.cardholderName = cardholderName;
     }
 
     public BigDecimal getAmount() {

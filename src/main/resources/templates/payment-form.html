@@ -87,30 +87,63 @@
         .back-btn:hover {
             background: #5a6268;
         }
+
+        /* Стили для валидации карты */
+        .card-valid {
+            border-color: #28a745 !important;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+        }
+
+        .card-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+
+        .card-validation-message {
+            margin-top: 5px;
+            font-size: 13px;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .card-valid-message {
+            color: #155724;
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .card-invalid-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
     </style>
 </head>
 <body>
 <div class="payment-form">
     <h2>Оплата</h2>
 
+    <!-- Показываем ошибку, если она есть -->
+    <div th:if="${error}"
+         style="color: #dc3545; padding: 15px; background: #f8d7da;
+                border-radius: 5px; margin-bottom: 20px;">
+        ❌ <span th:text="${error}"></span>
+    </div>
+
     <form id="paymentForm" th:action="@{/payment-form/otp}" method="post">
         <div class="form-group">
-            <label for="surname">Фамилия</label>
-            <input type="text" id="surname" name="surname"
-                   placeholder="Иванов" th:value="${surname}" required>
+            <label for="cardholderName">Владелец карты</label>
+            <input type="text" id="cardholderName" name="cardholderName"
+                   placeholder="IVANOV IVAN"
+                   th:value="${cardholderName}"
+                   style="text-transform: uppercase;"
+                   required>
+            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                Введите как на карте (система автоматически переведет в заглавные буквы)
+            </small>
+            <div id="nameError" style="color: #dc3545; font-size: 12px; margin-top: 5px;"></div>
         </div>
 
-        <div class="form-group">
-            <label for="nameUser">Имя</label>
-            <input type="text" id="nameUser" name="nameUser"
-                   placeholder="Иван" th:value="${nameUser}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="patronymic">Отчество</label>
-            <input type="text" id="patronymic" name="patronymic"
-                   placeholder="Иванович" th:value="${patronymic}">
-        </div>
 
         <div class="form-group">
             <label for="amount">Сумма</label>
@@ -127,6 +160,10 @@
             <input type="text" id="cardNumber" name="cardNumber"
                    placeholder="0000 0000 0000 0000"
                    maxlength="19" th:value="${cardNumber}" required>
+            <div id="cardValidationMessage" class="card-validation-message" style="display: none;"></div>
+            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                Введите 16 цифр номера карты
+            </small>
         </div>
 
         <div class="card-group">
@@ -183,14 +220,96 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('paymentForm');
+        const nameInput = document.getElementById('cardholderName'); // переименовал для ясности
         const submitBtn = document.getElementById('submitBtn');
         const resultDiv = document.getElementById('resultMessage');
+
+        // ============ АВТОМАТИЧЕСКИЙ CAPS ДЛЯ ИМЕНИ ============
+        if (nameInput) {
+            // 1. Автоматический перевод в верхний регистр при вводе
+            nameInput.addEventListener('input', function(e) {
+                // Сохраняем позицию курсора
+                const cursorPosition = this.selectionStart;
+                // Переводим в верхний регистр
+                this.value = this.value.toUpperCase();
+                // Восстанавливаем позицию курсора
+                this.setSelectionRange(cursorPosition, cursorPosition);
+            });
+
+            // 2. При загрузке страницы переводим существующее значение в CAPS
+            if (nameInput.value) {
+                nameInput.value = nameInput.value.toUpperCase();
+            }
+        }
+
+        // ============ АЛГОРИТМ ЛУНА В JavaScript ============
+        function isValidLuhn(cardNumber) {
+            // Удаляем все нецифровые символы
+            const cleanNumber = cardNumber.replace(/\D/g, '');
+
+            // Проверяем длину
+            if (cleanNumber.length < 13 || cleanNumber.length > 19) {
+                return false;
+            }
+
+            let sum = 0;
+            let isEven = false;
+
+            // Идем справа налево
+            for (let i = cleanNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cleanNumber.charAt(i), 10);
+
+                if (isEven) {
+                    digit *= 2;
+                    if (digit > 9) {
+                        digit -= 9; // Эквивалентно сложению цифр
+                    }
+                }
+
+                sum += digit;
+                isEven = !isEven;
+            }
+
+            return (sum % 10 === 0);
+        }
+
+        function updateCardValidationUI(cardNumber) {
+            const cardInput = document.getElementById('cardNumber');
+            const validationMsg = document.getElementById('cardValidationMessage');
+
+            if (!cardNumber || cardNumber.replace(/\s/g, '').length < 13) {
+                // Если номер слишком короткий, скрываем сообщение
+                validationMsg.style.display = 'none';
+                cardInput.classList.remove('card-valid', 'card-invalid');
+                return;
+            }
+
+            const isValid = isValidLuhn(cardNumber);
+
+            if (isValid) {
+                cardInput.classList.remove('card-invalid');
+                cardInput.classList.add('card-valid');
+                validationMsg.innerHTML = '<span style="color: #28a745;">✓ Номер карты валиден</span>';
+                validationMsg.className = 'card-validation-message card-valid-message';
+                validationMsg.style.display = 'block';
+            } else {
+                cardInput.classList.remove('card-valid');
+                cardInput.classList.add('card-invalid');
+                validationMsg.innerHTML = '<span style="color: #dc3545;">✗ Неверный номер карты. Проверьте правильность ввода.</span>';
+                validationMsg.className = 'card-validation-message card-invalid-message';
+                validationMsg.style.display = 'block';
+            }
+        }
+        // ============ КОНЕЦ АЛГОРИТМА ЛУНА ============
 
         // Форматирование номера карты
         document.getElementById('cardNumber').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
             value = value.replace(/(\d{4})/g, '$1 ').trim();
             e.target.value = value.substring(0, 19);
+
+            // Проверяем алгоритмом Луна
+            updateCardValidationUI(value);
         });
 
         // Форматирование срока действия
@@ -202,10 +321,240 @@
             e.target.value = value.substring(0, 5);
         });
 
-        // Обработка отправки формы
+        // Валидация имени владельца карты (при потере фокуса)
+        nameInput?.addEventListener('blur', function() {
+            const value = this.value.trim().toUpperCase(); // гарантируем CAPS
+            const errorDiv = document.getElementById('nameError') ||
+                            (() => {
+                                const div = document.createElement('div');
+                                div.id = 'nameError';
+                                div.style.cssText = 'color:#dc3545;margin-top:5px;font-size:14px;';
+                                this.parentNode.appendChild(div);
+                                return div;
+                            })();
 
+            // Обновляем значение (на случай если пользователь ввел пробелы)
+            this.value = value;
+
+            if (!value) {
+                errorDiv.textContent = 'Введите имя владельца карты';
+                this.style.borderColor = '#dc3545';
+            } else if (/[а-яА-ЯёЁ]/.test(value)) {
+                errorDiv.textContent = 'Имя должно быть на латинице';
+                this.style.borderColor = '#dc3545';
+            } else if (value.split(/\s+/).filter(w => w.length > 0).length < 2) {
+                errorDiv.textContent = 'Введите имя и фамилию (например: IVANOV IVAN)';
+                this.style.borderColor = '#dc3545';
+            } else {
+                errorDiv.textContent = '';
+                this.style.borderColor = '#28a745';
+            }
+        });
+
+        // Проверка перед отправкой формы
+        form.addEventListener('submit', function(e) {
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cleanCardNumber = cardNumber.replace(/\s/g, '');
+
+            // 1. Фиксируем имя в CAPS перед отправкой
+            if (nameInput) {
+                nameInput.value = nameInput.value.toUpperCase().trim();
+                const cardholderName = nameInput.value;
+
+                // Проверка имени владельца
+                if (!cardholderName) {
+                    e.preventDefault();
+                    alert('Введите имя владельца карты');
+                    nameInput.focus();
+                    return false;
+                }
+
+                if (/[а-яА-ЯёЁ]/.test(cardholderName)) {
+                    e.preventDefault();
+                    alert('Имя владельца карты должно быть написано латинскими буквами.');
+                    nameInput.focus();
+                    return false;
+                }
+
+                if (cardholderName.split(/\s+/).filter(w => w.length > 0).length < 2) {
+                    e.preventDefault();
+                    alert('Введите имя и фамилию (например: IVANOV IVAN)');
+                    nameInput.focus();
+                    return false;
+                }
+            }
+
+            // 2. Проверка алгоритмом Луна
+            if (cleanCardNumber.length >= 13 && !isValidLuhn(cardNumber)) {
+                e.preventDefault();
+                alert('Пожалуйста, проверьте номер карты. Он содержит ошибку.');
+                document.getElementById('cardNumber').focus();
+                return false;
+            }
+
+            return true;
+        });
+
+        // Проверяем номер карты при загрузке страницы, если он уже есть
+        const initialCardNumber = document.getElementById('cardNumber').value;
+        if (initialCardNumber) {
+            updateCardValidationUI(initialCardNumber);
+        }
+
+        // Проверяем имя при загрузке страницы, если оно уже есть
+        if (nameInput && nameInput.value) {
+            nameInput.value = nameInput.value.toUpperCase();
+            // Запускаем валидацию
+            nameInput.dispatchEvent(new Event('blur'));
+        }
     });
 </script>
+<script>
+    // ДОБАВЬ ПЕРЕД ЭТОЙ СТРОКОЙ: </body>
+    // ============================
+
+    // Определение типа карты при вводе
+    (function() {
+        'use strict';
+
+        // Ждем загрузки DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCardDetection);
+        } else {
+            initCardDetection();
+        }
+
+        function initCardDetection() {
+            const cardInput = document.getElementById('cardNumber');
+            if (!cardInput) return;
+
+            // Создаем контейнер для отображения типа карты
+            const previewContainer = document.createElement('div');
+            previewContainer.id = 'cardTypePreview';
+            previewContainer.style.cssText = `
+                margin-top: 8px;
+                padding: 10px 15px;
+                border-radius: 6px;
+                background: #f8f9fa;
+                display: none;
+                align-items: center;
+                gap: 12px;
+                border-left: 4px solid transparent;
+                transition: all 0.3s ease;
+                font-size: 14px;
+            `;
+
+            // Вставляем после поля карты
+            cardInput.parentNode.appendChild(previewContainer);
+
+            // Обработчик ввода
+            cardInput.addEventListener('input', handleCardInput);
+
+            // Показываем сразу, если есть значение
+            if (cardInput.value.trim()) {
+                handleCardInput({ target: cardInput });
+            }
+        }
+
+        function handleCardInput(event) {
+            const input = event.target;
+            const preview = document.getElementById('cardTypePreview');
+            const cardNumber = input.value.replace(/\s/g, '');
+
+            if (!cardNumber) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            // Определяем тип карты
+            const cardType = detectCardType(cardNumber);
+
+            // Обновляем превью
+            preview.innerHTML = `
+                <div style="font-size: 24px; color: ${cardType.color}; min-width: 40px; text-align: center;">
+                    ${cardType.icon}
+                </div>
+                <div style="flex-grow: 1;">
+                    <div style="font-weight: 600; color: ${cardType.color}; font-size: 16px;">
+                        ${cardType.name}
+                    </div>
+                    <div style="font-size: 13px; color: #666; margin-top: 2px;">
+                        ${cardNumber.length >= 4 ? `•••• ${cardNumber.slice(-4)}` : 'Введите номер карты'}
+                    </div>
+                </div>
+            `;
+
+            preview.style.display = 'flex';
+            preview.style.borderLeftColor = cardType.color;
+            preview.style.boxShadow = `0 2px 4px ${cardType.color}20`;
+        }
+
+        function detectCardType(cardNumber) {
+            if (!cardNumber || cardNumber.length === 0) {
+                return {
+                    name: 'Введите номер карты',
+                    icon: '💳',
+                    color: '#6c757d'
+                };
+            }
+
+            const firstDigit = cardNumber[0];
+
+            if (firstDigit === '4') {
+                return {
+                    name: 'Visa',
+                    icon: '💳',
+                    color: '#1a1f71',
+                    description: 'Международная платежная система'
+                };
+            } else if (firstDigit === '5') {
+                return {
+                    name: 'MasterCard',
+                    icon: '💳',
+                    color: '#eb001b',
+                    description: 'Международная платежная система'
+                };
+            } else if (firstDigit === '2') {
+                return {
+                    name: 'МИР',
+                    icon: '🇷🇺',
+                    color: '#1e5f9a',
+                    description: 'Национальная платежная система России'
+                };
+            } else {
+                return {
+                    name: 'Неизвестная карта',
+                    icon: '💳',
+                    color: '#6c757d',
+                    description: 'Проверьте номер карты'
+                };
+            }
+        }
+    })();
+
+    // Убираем конфликт с существующим форматированием
+    document.addEventListener('DOMContentLoaded', function() {
+        const originalHandler = document.getElementById('cardNumber').oninput;
+
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            // Вызываем оригинальный обработчик (форматирование)
+            if (originalHandler) originalHandler.call(this, e);
+
+            // Добавляем определение типа карты
+            const event = new Event('input', { bubbles: true });
+            this.dispatchEvent(event);
+        });
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* Стили для превью типа карты */
+    #cardTypePreview i {
+        font-size: 24px;
+    }
+</style>
 
 </body>
 </html>

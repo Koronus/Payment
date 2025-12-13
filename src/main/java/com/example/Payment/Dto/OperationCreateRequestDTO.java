@@ -6,16 +6,10 @@ import java.time.LocalDateTime;
 
 public class OperationCreateRequestDTO {
 
-    @NotBlank(message = "Фамилия обязательна")
-    @Size(max = 50, message = "Фамилия не должна превышать 50 символов")
-    private String surname;
-
-    @NotBlank(message = "Имя обязательно")
-    @Size(max = 50, message = "Имя не должно превышать 50 символов")
-    private String nameUser;
-
-    @Size(max = 50, message = "Отчество не должно превышать 50 символов")
-    private String patronymic;
+    @NotBlank(message = "Фимилия и имя владельца обязательно")
+    @Pattern(regexp = "^[A-Za-z\\s\\.]+$",
+            message = "Только латинские буквы, как на карте")
+    private String cardholderName;
 
     @NotNull(message = "Сумма обязательна")
     @DecimalMin(value = "0.01", message = "Сумма должна быть больше 0")
@@ -35,14 +29,10 @@ public class OperationCreateRequestDTO {
     public LocalDateTime createdAt;
 
     // Геттеры и сеттеры
-    public String getSurname() { return surname; }
-    public void setSurname(String surname) { this.surname = surname; }
+    public String getCardholderName() { return cardholderName; }
+    public void setCardholderName(String cardholderName) { this.cardholderName = cardholderName; }
 
-    public String getNameUser() { return nameUser; }
-    public void setNameUser(String nameUser) { this.nameUser = nameUser; }
 
-    public String getPatronymic() { return patronymic; }
-    public void setPatronymic(String patronymic) { this.patronymic = patronymic; }
 
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }

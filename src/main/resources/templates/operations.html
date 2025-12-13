@@ -242,7 +242,7 @@
             <thead>
             <tr>
                 <th>ID</th>
-                <th>ФИО</th>
+                <th>Владелец карты</th>
                 <th>Сумма</th>
                 <th>Назначение</th>
                 <th>Карта</th>
@@ -254,8 +254,8 @@
             <tr th:each="operation : ${operations}">
                 <td th:text="${operation.operationsId}">1</td>
                 <td>
-                    <strong th:text="${operation.surname}">Иванов</strong><br>
-                    <span th:text="${operation.nameUser} + ' ' + ${operation.patronymic}">Петр Сергеевич</span>
+                    <strong th:text="${operation.cardholderName}">Ivanov Ivan</strong><br>
+
                 </td>
                 <td class="amount" th:text="${#numbers.formatDecimal(operation.amount, 1, 2)} + ' ₽'">1000.00 ₽</td>
                 <td th:text="${operation.purpose}">Оплата услуг</td>

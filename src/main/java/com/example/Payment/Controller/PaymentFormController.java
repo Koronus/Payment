@@ -32,6 +32,41 @@ public class PaymentFormController {
     @Autowired
     private OperationMapper operationMapper;
 
+    // ====== ВСПОМОГАТЕЛЬНЫЙ МЕТОД: АЛГОРИТМ ЛУНА ======
+    private boolean isValidLuhn(String cardNumber) {
+        if (cardNumber == null || cardNumber.trim().isEmpty()) {
+            return false;
+        }
+
+        // Удаляем все нецифровые символы
+        String cleanNumber = cardNumber.replaceAll("[^0-9]", "");
+
+        // Проверяем длину (стандартные карты: 13-19 цифр)
+        if (cleanNumber.length() < 13 || cleanNumber.length() > 19) {
+            return false;
+        }
+
+        int sum = 0;
+        boolean doubleDigit = false;
+
+        // Идем справа налево
+        for (int i = cleanNumber.length() - 1; i >= 0; i--) {
+            int digit = Character.getNumericValue(cleanNumber.charAt(i));
+
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9; // Эквивалентно сложению цифр (16 → 1+6=7, но 16-9=7)
+                }
+            }
+
+            sum += digit;
+            doubleDigit = !doubleDigit;
+        }
+
+        return (sum % 10 == 0);
+    }
+
     // ====== 1. Показ формы оплаты (GET /payment-form) ======
     @GetMapping
     public String showPaymentForm(@RequestParam(required = false) String paymentId,
@@ -61,9 +96,7 @@ public class PaymentFormController {
     // ====== 3. Шаг 1: форма → генерация OTP (POST /payment-form/otp) ======
     @PostMapping("/otp")
     public String handlePaymentFormAndShowOtp(
-            @RequestParam String surname,
-            @RequestParam String nameUser,
-            @RequestParam String patronymic,
+            @RequestParam String cardholderName,
             @RequestParam String amount,
             @RequestParam String purpose,
             @RequestParam String cardNumber,
@@ -71,10 +104,58 @@ public class PaymentFormController {
             HttpSession session,
             Model model) {
 
+        // ============ ВАЛИДАЦИЯ КИРИЛЛИЦЫ ============
+        if (cardholderName != null && cardholderName.matches(".*[а-яА-ЯёЁ].*")) {
+            model.addAttribute("error", "Имя владельца карты должно быть написано латинскими буквами");
+            model.addAttribute("cardholderName", cardholderName);
+            model.addAttribute("amount", amount);
+            model.addAttribute("purpose", purpose);
+            model.addAttribute("cardNumber", cardNumber);
+            model.addAttribute("email", email);
+            return "payment-form"; // возвращаем обратно на форму с ошибкой
+        }
+
+        // ============ ДОПОЛНИТЕЛЬНАЯ ВАЛИДАЦИЯ ============
+        // Проверка формата имени (минимум 2 слова)
+        if (cardholderName != null) {
+            String[] nameParts = cardholderName.trim().split("\\s+");
+            if (nameParts.length < 2) {
+                model.addAttribute("error", "Введите имя и фамилию (например: IVANOV IVAN)");
+                model.addAttribute("cardholderName", cardholderName);
+                model.addAttribute("amount", amount);
+                model.addAttribute("purpose", purpose);
+                model.addAttribute("cardNumber", cardNumber);
+                model.addAttribute("email", email);
+                return "payment-form";
+            }
+
+            // Проверка на латинские буквы (более строгая)
+            if (!cardholderName.matches("^[A-Za-z\\s\\-'’.]+$")) {
+                model.addAttribute("error", "Имя может содержать только латинские буквы, пробелы, дефисы и апострофы");
+                model.addAttribute("cardholderName", cardholderName);
+                model.addAttribute("amount", amount);
+                model.addAttribute("purpose", purpose);
+                model.addAttribute("cardNumber", cardNumber);
+                model.addAttribute("email", email);
+                return "payment-form";
+            }
+        }
+
+        // ============ ВАЛИДАЦИЯ НОМЕРА КАРТЫ (АЛГОРИТМ ЛУНА) ============
+        if (cardNumber != null && !isValidLuhn(cardNumber)) {
+            model.addAttribute("error", "Неверный номер карты. Проверьте правильность ввода.");
+            model.addAttribute("cardholderName", cardholderName);
+            model.addAttribute("amount", amount);
+            model.addAttribute("purpose", purpose);
+            model.addAttribute("cardNumber", cardNumber);
+            model.addAttribute("email", email);
+            return "payment-form";
+        }
+        // ============ КОНЕЦ ВАЛИДАЦИИ ============
+
+
         // сохраняем все данные формы в сессию
-        session.setAttribute("surname", surname);
-        session.setAttribute("nameUser", nameUser);
-        session.setAttribute("patronymic", patronymic);
+        session.setAttribute("cardholderName", cardholderName);
         session.setAttribute("amount", amount);
         session.setAttribute("purpose", purpose);
         session.setAttribute("cardNumber", cardNumber);
@@ -120,18 +201,21 @@ public class PaymentFormController {
 
         try {
             // 2. Достаём данные формы из сессии
-            String surname    = (String) session.getAttribute("surname");
-            String nameUser   = (String) session.getAttribute("nameUser");
-            String patronymic = (String) session.getAttribute("patronymic");
+            String cardholderName    = (String) session.getAttribute("cardholderName");
             String amountStr  = (String) session.getAttribute("amount");
             String purpose    = (String) session.getAttribute("purpose");
             String cardNumber = (String) session.getAttribute("cardNumber");
             String email      = (String) session.getAttribute("email");
 
+            // Финальная проверка алгоритмом Луна (на всякий случай)
+            if (!isValidLuhn(cardNumber)) {
+                response.put("paymentSuccess", false);
+                response.put("message", "Неверный номер карты");
+                return response;
+            }
+
             Operation operation = new Operation();
-            operation.setSurname(surname);
-            operation.setName_user(nameUser);
-            operation.setPatronymic(patronymic);
+            operation.setCardholderName(cardholderName);
             operation.setAmount(new BigDecimal(amountStr));
             operation.setPurpose(purpose);
             operation.setCard_number(cardNumber);
@@ -215,7 +299,7 @@ public class PaymentFormController {
     @PostMapping("/process")
     @ResponseBody
     public ResponseEntity<?> processPayment(
-            @Valid @ModelAttribute OperationCreateRequestDTO operationCreateRequestDTO  , // ← @Valid здесь!
+            @Valid @ModelAttribute OperationCreateRequestDTO operationCreateRequestDTO, // ← @Valid здесь!
             BindingResult bindingResult) { // ← BindingResult для ошибок
 
         // Проверяем ошибки валидации
@@ -232,6 +316,15 @@ public class PaymentFormController {
 
             return ResponseEntity.badRequest().body(response);
         }
+
+        // Дополнительная проверка алгоритмом Луна
+//        if (!isValidLuhn(operationCreateRequestDTO.getCard_number())) {
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("status", "validation_error");
+//            response.put("message", "Неверный номер карты");
+//            response.put("errors", List.of("card_number: Неверный номер карты"));
+//            return ResponseEntity.badRequest().body(response);
+//        }
 
         try {
 

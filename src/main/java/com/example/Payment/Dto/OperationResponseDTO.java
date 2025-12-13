@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 
 public class OperationResponseDTO {
     private Integer operationsId;
-    private String surname;
-    private String nameUser;
-    private String patronymic;
+    private String cardholderName;
     private BigDecimal amount;
     private String purpose;
     private String maskedCardNumber; // Маскированный номер карты для безопасности
@@ -19,9 +17,7 @@ public class OperationResponseDTO {
     // Конструктор из Entity
     public OperationResponseDTO(Operation operation) {
         this.operationsId = operation.getOperations_Id();
-        this.surname = operation.getSurname();
-        this.nameUser = operation.getName_user();
-        this.patronymic = operation.getPatronymic();
+        this.cardholderName = operation.getCardholderName();
         this.amount = operation.getAmount();
         this.purpose = operation.getPurpose();
         this.maskedCardNumber = maskCardNumber(operation.getCard_number());
@@ -34,11 +30,13 @@ public class OperationResponseDTO {
         return cardNumber.substring(0, 4) + " **** **** " + cardNumber.substring(cardNumber.length() - 4);
     }
 
-    // Геттеры
+    // Геттеры.
+
+    public String getCardholderName() {
+        return cardholderName;
+    }
     public Integer getOperationsId() { return operationsId; }
-    public String getSurname() { return surname; }
-    public String getNameUser() { return nameUser; }
-    public String getPatronymic() { return patronymic; }
+    public String getSurname() { return cardholderName; }
     public BigDecimal getAmount() { return amount; }
     public String getPurpose() { return purpose; }
     public String getMaskedCardNumber() { return maskedCardNumber; }
