@@ -29,7 +29,7 @@ otpForm.addEventListener('submit', function (event) {
 
       // Код верный – только сообщение про код
       statusMsg.textContent =
-        'Код успешно подтверждён. Сейчас вы увидите результат обработки платежа.';
+        'Код успешно подтверждён. Сейчас вы будете перенаправлены на другую страницу';
       statusMsg.className = 'status-message success';
 
       setTimeout(() => {

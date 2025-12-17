@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import java.time.format.DateTimeFormatter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,12 +23,24 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+
+
+
+
 @Controller
 @RequestMapping("/payment-form")
 public class PaymentFormController {
 
+    private static final DateTimeFormatter CHECK_DT_FMT =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    @Autowired
+    private com.example.Payment.Service.OtpEmailService otpEmailService;
+
     @Autowired
     private OperationService operationService;
+
+    @Autowired
+    private com.example.Payment.Service.ReceiptEmailService receiptEmailService;
 
     @Autowired
     private OperationMapper operationMapper;
@@ -164,10 +177,31 @@ public class PaymentFormController {
         // генерируем 4-значный код
         int code = ThreadLocalRandom.current().nextInt(1000, 10000);
         session.setAttribute("otp", code);
-        System.out.println("SMS code: " + code);
+        // статус для UI
+        session.setAttribute("otpMailStatus", "sending");
+        session.setAttribute("otpMailError", null);
+        try {
+            otpEmailService.sendOtpAsync(email, code)
+                    .thenRun(() -> session.setAttribute("otpMailStatus", "sent"))
+                    .exceptionally(ex -> {
+                        session.setAttribute("otpMailStatus", "error");
+                        session.setAttribute("otpMailError", ex.getMessage());
+                        return null;
+                    });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            model.addAttribute("error", "Не удалось отправить код подтверждения на email. Проверьте адрес или настройки почты.");
+            model.addAttribute("cardholderName", cardholderName);
+            model.addAttribute("amount", amount);
+            model.addAttribute("purpose", purpose);
+            model.addAttribute("cardNumber", cardNumber);
+            model.addAttribute("email", email);
+            return "payment-form";
+        }
 
-        // показываем страницу ввода кода
-        return "SMSVerification"; // шаблон SMSVerification.html
+// показываем страницу ввода кода
+        return "SMSVerification";
+
     }
 
     // ====== 4. Шаг 2: проверка OTP (POST /payment-form/verify-otp) ======
@@ -236,8 +270,39 @@ public class PaymentFormController {
                 session.setAttribute("paymentResultMessage", "Платёж успешно обработан");
                 session.setAttribute("paymentResultOperationId", savedOperation.getOperations_Id());
 
+                session.setAttribute("paymentResultAmount", amountStr);
+                session.setAttribute("paymentResultPurpose", purpose);
+
+
+                // ---- создаём чек ОДИН РАЗ (и для страницы, и для email)
+                ReceiptView receipt = new ReceiptView(
+                        "DemoShop",
+                        randomInn10(),
+                        LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")),
+                        "Приход",
+                        (purpose != null && !purpose.isBlank()) ? ("Оплата услуги: " + purpose) : "Оплата услуги DemoShop",
+                        new BigDecimal(amountStr),
+                        "https://nalog.gov.ru/",
+                        "https://www.nalog.gov.ru/rn77/about_fts/docs/3909988/", // 54-ФЗ на сайте ФНС
+                        "" // qrUrl в шаблоне страницы не нужен, если используешь /qr.svg
+                );
+                session.setAttribute("paymentResultReceipt", receipt);
+
+                // ---- отправляем письмо
+                try {
+                    receiptEmailService.sendReceipt(email, receipt, savedOperation.getOperations_Id());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    // не валим оплату, просто фиксируем что email не ушёл
+                    session.setAttribute("paymentResultMailWarning",
+                            "Чек не удалось отправить на email: " + email + ". Причина: "
+                                    + ex.getClass().getSimpleName() + " — " + ex.getMessage());
+                }
+
+
                 response.put("paymentSuccess", true);
-            } else {
+            }
+            else {
                 savedOperation.setStatus("FAILED");
                 operationService.save(savedOperation);
 
@@ -285,10 +350,26 @@ public class PaymentFormController {
         model.addAttribute("paymentMessage", message);
         model.addAttribute("paymentOperationId", opIdObj);
 
+        if ("success".equals(status)) {
+            ReceiptView receipt = (ReceiptView) session.getAttribute("paymentResultReceipt");
+            model.addAttribute("receipt", receipt);
+
+            String mailWarning = (String) session.getAttribute("paymentResultMailWarning");
+            model.addAttribute("mailWarning", mailWarning);
+        }
+
+
+
         // очищаем, чтобы при F5 не дёргалось повторно
         session.removeAttribute("paymentResultStatus");
         session.removeAttribute("paymentResultMessage");
         session.removeAttribute("paymentResultOperationId");
+        session.removeAttribute("paymentResultAmount");
+        session.removeAttribute("paymentResultPurpose");
+        session.removeAttribute("paymentResultReceipt");
+        session.removeAttribute("paymentResultMailWarning");
+
+
 
         return "payment-result"; // новый шаблон
     }
@@ -363,7 +444,24 @@ public class PaymentFormController {
             return ResponseEntity.badRequest().body(resp);
         }
     }
+    private static String randomInn10() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ThreadLocalRandom.current().nextInt(1, 10)); // первая цифра 1..9
+        for (int i = 0; i < 9; i++) sb.append(ThreadLocalRandom.current().nextInt(0, 10));
+        return sb.toString();
+    }
 
+    public record ReceiptView(
+            String sellerName,
+            String sellerInn,
+            String datetime,
+            String paymentSign,
+            String itemName,
+            BigDecimal amount,
+            String fnsUrl,
+            String law54Url,
+            String qrUrl
+    ) {}
     // ====== Вспомогательный метод эмуляции платежа ======
     private boolean emulatePaymentProcessing() {
         Random random = new Random();
