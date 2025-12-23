@@ -30,6 +30,18 @@ public class Operation {
     @Column(name = "status") // Маппинг на существующий столбец
     private String status;
 
+    @Column(name = "gateway_message")
+    private String gatewayMessage; // Сообщение от шлюза
+
+    @Column(name = "error_code")
+    private String errorCode; // Код ошибки
+
+    @Column(name = "error_details")
+    private String errorDetails; // Детали ошибки
+
+    @Column(name = "gateway_response")
+    private String gatewayResponse; // Полный JSON ответ от шлюза (если нужно)
+
     @Column(name = "created_at") // Маппинг на существующий столбец
     private LocalDateTime created_at;
 
@@ -39,16 +51,21 @@ public class Operation {
         // Пустой конструктор обязателен для JPA
     }
 
-
-    public Operation(Integer Operations_ID, String cardholderName, BigDecimal amount, String purpose, String card_number, String status, LocalDateTime created_at) {
+    public Operation(Integer operations_Id, String cardholderName, BigDecimal amount, String purpose, String card_number, String status, String gatewayMessage,
+                     String errorCode, String errorDetails, String gatewayResponse, LocalDateTime created_at) {
         this.operations_Id = operations_Id;
         this.cardholderName = cardholderName;
         this.amount = amount;
-        this.purpose=purpose;
-        this.card_number=card_number;
-        this.status=status;
-        this.created_at=created_at;
+        this.purpose = purpose;
+        this.card_number = card_number;
+        this.status = status;
+        this.gatewayMessage = gatewayMessage;
+        this.errorCode = errorCode;
+        this.errorDetails = errorDetails;
+        this.gatewayResponse = gatewayResponse;
+        this.created_at = created_at;
     }
+
 
     // Геттеры и сеттеры
 
@@ -108,7 +125,35 @@ public class Operation {
         this.created_at = created_at;
     }
 
+    public String getGatewayMessage() {
+        return gatewayMessage;
+    }
 
+    public void setGatewayMessage(String gatewayMessage) {
+        this.gatewayMessage = gatewayMessage;
+    }
 
+    public String getErrorCode() {
+        return errorCode;
+    }
 
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorDetails() {
+        return errorDetails;
+    }
+
+    public void setErrorDetails(String errorDetails) {
+        this.errorDetails = errorDetails;
+    }
+
+    public String getGatewayResponse() {
+        return gatewayResponse;
+    }
+
+    public void setGatewayResponse(String gatewayResponse) {
+        this.gatewayResponse = gatewayResponse;
+    }
 }

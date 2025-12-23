@@ -33,10 +33,11 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
             @Value("${card.encryption.key:1234567890123456}")
             String encryptionKey) {
 
-        System.out.println("=== ИНИЦИАЛИЗАЦИЯ КОНВЕРТЕРА ===");
-        System.out.println("Ключ из properties: '" + encryptionKey + "'");
-        System.out.println("Длина ключа в символах: " + encryptionKey.length());
-        System.out.println("Длина ключа в байтах: " + encryptionKey.getBytes(StandardCharsets.UTF_8).length);
+        //Отладка вывода данных о карте в консоль
+//        System.out.println("=== ИНИЦИАЛИЗАЦИЯ КОНВЕРТЕРА ===");
+//        System.out.println("Ключ из properties: '" + encryptionKey + "'");
+//        System.out.println("Длина ключа в символах: " + encryptionKey.length());
+//        System.out.println("Длина ключа в байтах: " + encryptionKey.getBytes(StandardCharsets.UTF_8).length);
 
         // Проверяем длину ключа
         byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
@@ -49,13 +50,13 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
         }
 
         this.encryptionKey = encryptionKey;
-        System.out.println("Конвертер инициализирован с ключом длиной " + keyBytes.length + " байт");
-        System.out.println("=================================");
+//        System.out.println("Конвертер инициализирован с ключом длиной " + keyBytes.length + " байт");
+//        System.out.println("=================================");
     }
 
     @Override
     public String convertToDatabaseColumn(String cardNumber) {
-        System.out.println("=== ШИФРОВАНИЕ (сохранение в БД) ===");
+        //System.out.println("=== ШИФРОВАНИЕ (сохранение в БД) ===");
 
         if (cardNumber == null || cardNumber.trim().isEmpty()) {
             return null;
@@ -63,7 +64,7 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
 
         // Если это уже зашифрованные данные (base64), возвращаем как есть
         if (isBase64Encrypted(cardNumber)) {
-            System.out.println("Данные уже зашифрованы, пропускаем");
+            //System.out.println("Данные уже зашифрованы, пропускаем");
             return cardNumber;
         }
 
@@ -105,7 +106,7 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
             return result;
 
         } catch (Exception e) {
-            System.err.println("ОШИБКА ШИФРОВАНИЯ: " + e.getClass().getName() + ": " + e.getMessage());
+            //System.err.println("ОШИБКА ШИФРОВАНИЯ: " + e.getClass().getName() + ": " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Ошибка при шифровании номера карты", e);
         }
@@ -113,7 +114,7 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
 
     @Override
     public String convertToEntityAttribute(String encryptedCardNumber) {
-        System.out.println("=== ДЕШИФРОВАНИЕ (чтение из БД) ===");
+        //System.out.println("=== ДЕШИФРОВАНИЕ (чтение из БД) ===");
 
         if (encryptedCardNumber == null || encryptedCardNumber.trim().isEmpty()) {
             return null;
@@ -121,14 +122,14 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
 
         // Вариант 1: Это обычный номер карты (не зашифрованный)
         if (isPlainCardNumber(encryptedCardNumber)) {
-            System.out.println("Это обычный номер карты (не зашифрован): " +
-                    maskCardNumber(encryptedCardNumber));
+//            System.out.println("Это обычный номер карты (не зашифрован): " +
+//                    maskCardNumber(encryptedCardNumber));
             return encryptedCardNumber;
         }
 
         // Вариант 2: Это base64 зашифрованные данные
         if (isBase64Encrypted(encryptedCardNumber)) {
-            System.out.println("Пытаемся расшифровать base64 данные длиной: " + encryptedCardNumber.length());
+            //System.out.println("Пытаемся расшифровать base64 данные длиной: " + encryptedCardNumber.length());
 
             try {
                 byte[] combined = Base64.getDecoder().decode(encryptedCardNumber);
@@ -156,7 +157,7 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
                 byte[] decryptedCardNumber = cipher.doFinal(encryptedData);
                 String result = new String(decryptedCardNumber, StandardCharsets.UTF_8);
 
-                System.out.println("Успешно расшифровано: " + maskCardNumber(result));
+         //       System.out.println("Успешно расшифровано: " + maskCardNumber(result));
                 return result;
 
             } catch (Exception e) {
@@ -168,8 +169,8 @@ public class SecureCardNumberConverter implements AttributeConverter<String, Str
         }
 
         // Вариант 3: Неизвестный формат
-        System.out.println("Неизвестный формат данных: " +
-                encryptedCardNumber.substring(0, Math.min(30, encryptedCardNumber.length())) + "...");
+       // System.out.println("Неизвестный формат данных: " +
+         //       encryptedCardNumber.substring(0, Math.min(30, encryptedCardNumber.length())) + "...");
         return "****";
     }
 

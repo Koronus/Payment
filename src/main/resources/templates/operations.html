@@ -247,6 +247,9 @@
                 <th>Назначение</th>
                 <th>Карта</th>
                 <th>Статус</th>
+                <th>Код ошибки</th>
+                <th>Детали ошибки</th>
+                <th>Сообщение шлюза</th>
                 <th>Дата создания</th>
             </tr>
             </thead>
@@ -270,6 +273,12 @@
                         SUCCESS
                     </span>
                 </td>
+
+                <td th:text="${operation.errorCode}">Код ошибки</td>
+                <td th:text="${operation.errorDetails}">Детали ошибки</td>
+                <td th:text="${operation.gatewayMessage}">Сообщение об ошибке</td>
+
+
                 <td th:text="${#temporals.format(operation.createdAt, 'dd.MM.yyyy HH:mm')}">18.11.2025 20:00</td>
             </tr>
             </tbody>

@@ -147,12 +147,12 @@
 
         <div class="form-group">
             <label for="amount">Сумма</label>
-            <input type="number" id="amount" name="amount" step="0.01" th:value="${amount}" required>
+            <input type="number" id="amount" name="amount" step="0.01" th:value="${amount}" readonly>
         </div>
 
         <div class="form-group">
             <label for="purpose">Назначение платежа</label>
-            <input type="text" id="purpose" name="purpose" th:value="${purpose}" required>
+            <input type="text" id="purpose" name="purpose" th:value="${purpose}" readonly>
         </div>
 
         <div class="form-group">
@@ -169,14 +169,14 @@
         <div class="card-group">
             <div class="form-group">
                 <label for="expiryDate">Срок действия</label>
-                <input type="text" id="expiryDate" placeholder="ММ/ГГ"
+                <input type="text" id="expiryDate"  name="expiryDate" placeholder="ММ/ГГ"
                        maxlength="5" th:value="${expiryDate}" required>
 
             </div>
 
             <div class="form-group">
                 <label for="cvv">CVV</label>
-                <input type="password" id="cvv" placeholder="000"
+                <input type="password" id="cvv" name="cvv" placeholder="000"
                        maxlength="3" th:value="${cvv}" required>
             </div>
         </div>
@@ -192,13 +192,13 @@
             Оплатить
         </button>
     </form>
-
+<!--
     <button type="button"
             class="back-btn"
             onclick="window.location.href='/'">
         Вернуться на главную
     </button>
-
+-->
     <div id="resultMessage">
         <div th:if="${paymentStatus} == 'success'"
              style="color: green; padding: 15px; background: #d4edda; border-radius: 5px; margin-top: 15px;">

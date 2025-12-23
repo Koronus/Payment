@@ -7,6 +7,8 @@
         body {
             font-family: Arial, sans-serif;
             background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
         }
         .result-box {
             max-width: 720px;
@@ -24,6 +26,7 @@
         .error {
             color: #dc3545;
         }
+
         .button {
             margin-top: 20px;
             padding: 10px 18px;
@@ -31,14 +34,34 @@
             border: none;
             cursor: pointer;
             font-size: 14px;
+            transition: all 0.3s ease;
         }
         .button-main {
             background: #007bff;
             color: #fff;
         }
         .button-main:hover {
-            background: #0069d9;
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+
+        .button-secondary {
+            background: #6c757d;
+            color: #fff;
+            margin-left: 10px;
+        }
+        .button-secondary:hover {
+            background: #545b62;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
         .receipt{
             margin: 18px auto 0;
             text-align: left;
@@ -77,26 +100,72 @@
             border-radius: 12px;
             border: 1px solid #eee;
         }
-        .receipt__qr .hint{font-size: 12px; color:#666;
+        .receipt__qr .hint{font-size: 12px; color:#666;}
+
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
         }
 
+        .countdown {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .external-site-info {
+            background: #e7f3ff;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #0066cc;
+            border-left: 4px solid #007bff;
+        }
+
+        .external-site-info a {
+            color: #0056b3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .external-site-info a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 <div class="result-box">
+    <!-- Информация о возврате на внешний сайт -->
+    <div th:if="${returnUrl != null and !returnUrl.isEmpty()}" class="external-site-info">
+        <i class="fas fa-external-link-alt" style="margin-right: 8px;"></i>
+        Вы будете автоматически возвращены на сайт магазина через <span id="countdown">10</span> секунд
+    </div>
+
     <h2 th:if="${paymentStatus} == 'success'"
-        class="success">Платёж выполнен</h2>
+        class="success">
+        <i class="fas fa-check-circle" style="margin-right: 10px;"></i>Платёж выполнен
+    </h2>
+
     <h2 th:if="${paymentStatus} == 'error'"
-        class="error">Платёж не выполнен</h2>
+        class="error">
+        <i class="fas fa-exclamation-circle" style="margin-right: 10px;"></i>Платёж не выполнен
+    </h2>
 
-    <p th:text="${paymentMessage}"></p>
+    <p th:text="${paymentMessage}" style="font-size: 16px; margin: 20px 0;"></p>
 
-    <p th:if="${paymentOperationId != null}">
-        ID операции:
-        <span th:text="${paymentOperationId}"></span>
+    <p th:if="${paymentOperationId != null}" style="margin: 15px 0;">
+        <strong>ID операции:</strong>
+        <span th:text="${paymentOperationId}" style="font-family: monospace; background: #f8f9fa; padding: 4px 8px; border-radius: 4px;"></span>
     </p>
 
-    <!-- CHECK-->
+    <!-- Чек -->
     <div th:if="${paymentStatus} == 'success' and ${receipt} != null" class="receipt">
         <div class="receipt__head">
             <div class="receipt__title">Электронный чек</div>
@@ -124,22 +193,259 @@
 
         <div class="receipt__qr">
             <a href="https://t1.ru/" target="_blank" rel="noopener">
-                <img src="/qr.svg" alt="QR на сайт", style="width:180px;height:180px;">
+                <img src="/qr.svg" alt="QR на сайт" style="width:180px;height:180px;">
             </a>
-            <!--<div class="hint">QR ведёт на t1</div> -->
         </div>
-        <p th:if="${mailWarning != null}" style="color:#b26b00;background:#fff3cd;padding:10px;border-radius:6px;">
+
+        <p th:if="${mailWarning != null}" style="color:#b26b00;background:#fff3cd;padding:10px;border-radius:6px;margin-top:15px;">
             ⚠ <span th:text="${mailWarning}"></span>
         </p>
+    </div>
+
+    <!-- Ошибка -->
+    <div th:if="${paymentStatus == 'error'}" class="alert alert-danger">
+        <h4 style="margin-top: 0;">
+            <i class="fas fa-times-circle" style="margin-right: 8px;"></i>Платеж не прошел
+        </h4>
+        <p th:text="${paymentMessage}">Сообщение об ошибке</p>
+
+        <!-- Детали ошибки -->
+        <div th:if="${paymentResultErrorCode != null}">
+            <hr>
+            <p><strong>Код ошибки:</strong> <span th:text="${paymentResultErrorCode}"></span></p>
+            <p><strong>Детали:</strong> <span th:text="${paymentResultErrorDetails}"></span></p>
+        </div>
+
+        <p style="margin-top: 15px;">
+            <strong>ID операции:</strong>
+            <span th:text="${paymentOperationId}" style="font-family: monospace;"></span>
+        </p>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="button-container">
+        <!-- Основная кнопка для возврата на внешний сайт -->
+        <button id="returnToSiteBtn" class="button button-main"
+                data-return-url="${returnUrl}"
+                onclick="handleReturnClick(this)"
+                th:style="${returnUrl != null and !returnUrl.isEmpty()} ? '' : 'display: none;'">
+            <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+            Вернуться в магазин
+            <span id="returnTimer" style="margin-left: 8px;">(10)</span>
+        </button>
+
+        <!-- Альтернативная кнопка - всегда ведет на внешний сайт -->
+        <!-- Если returnUrl есть, используем его, если нет - на главную платежного сервиса -->
+        <button id="alternativeBtn" class="button button-secondary"
+                data-return-url="${returnUrl}"
+                onclick="handleAlternativeClick(this)">
+            <i class="fas fa-home" style="margin-right: 8px;"></i>
+            <span th:text="${returnUrl != null and !returnUrl.isEmpty()} ? 'На главную магазина' : 'На главную'"></span>
+        </button>
+
 
     </div>
 
+    <!-- Информация о магазине -->
+    <div th:if="${externalOrderId != null}" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 14px; color: #666;">
+        <p><strong>Номер заказа в магазине:</strong> <span th:text="${externalOrderId}"></span></p>
+        <p th:if="${externalEmail != null}"><strong>Email покупателя:</strong> <span th:text="${externalEmail}"></span></p>
+    </div>
+</div>
 
+<script>
+    // Глобальные переменные
+    let countdownInterval;
+    let returnUrl = '';
+    let orderId = '';
+    let operationId = '';
+    let amount = '';
+    let product = '';
 
-    <button class="button button-main"
-            onclick="window.location.href='/'">
-        Вернуться на главную
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем данные из Thymeleaf
+        returnUrl = '[[${returnUrl}]]' || '';
+        orderId = '[[${externalOrderId}]]' || '';
+        operationId = '[[${paymentOperationId}]]' || '';
+        amount = '[[${paymentAmount}]]' || '';
+        product = '[[${paymentPurpose}]]' || '';
+        const paymentStatus = '[[${paymentStatus}]]' || '';
+
+        console.log('Данные для возврата:', {
+            returnUrl: returnUrl,
+            orderId: orderId,
+            operationId: operationId,
+            amount: amount,
+            product: product,
+            paymentStatus: paymentStatus
+        });
+
+        // Если есть URL для возврата, запускаем таймер
+        if (returnUrl && returnUrl.trim() !== '') {
+            startReturnCountdown();
+        }
+    });
+
+    // Запуск обратного отсчета
+    function startReturnCountdown() {
+        const returnBtn = document.getElementById('returnToSiteBtn');
+        const returnTimer = document.getElementById('returnTimer');
+        const countdownElement = document.getElementById('countdown');
+
+        let countdown = 10;
+
+        // Обновляем таймер на кнопке и в сообщении
+        function updateTimer() {
+            if (returnTimer) returnTimer.textContent = '(' + countdown + ')';
+            if (countdownElement) countdownElement.textContent = countdown;
+
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                returnToExternalSite(returnUrl);
+            }
+            countdown--;
+        }
+
+        // Обновляем сразу
+        updateTimer();
+
+        // Запускаем интервал
+        countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Возврат на внешний сайт
+    function returnToExternalSite(baseUrl) {
+        if (!baseUrl || baseUrl.trim() === '') {
+            console.error('Нет URL для возврата');
+            window.location.href = '/payment-form';
+            return;
+        }
+
+        // Останавливаем таймер
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        // Создаем URL для возврата с параметрами
+        const returnUrl = new URL(baseUrl);
+
+        // Добавляем параметры платежа
+        const params = returnUrl.searchParams;
+
+        // Добавляем обязательные параметры
+        params.append('payment_status', 'success');
+        params.append('timestamp', Date.now().toString());
+
+        // Добавляем данные о платеже, если они есть
+        if (orderId) params.append('order_id', orderId);
+        if (operationId) params.append('operation_id', operationId);
+        if (amount) params.append('amount', amount);
+        if (product) params.append('product', product);
+
+        console.log('Возвращаемся на внешний сайт:', returnUrl.toString());
+
+        // Перенаправляем
+        window.location.href = returnUrl.toString();
+    }
+
+    // Попытка повторного платежа
+    function retryPayment(baseUrl) {
+        if (!baseUrl || baseUrl.trim() === '') {
+            alert('Не удалось получить информацию о магазине');
+            return;
+        }
+
+        // Останавливаем таймер
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        // Возвращаем на сайт магазина с флагом для повторной попытки
+        const returnUrl = new URL(baseUrl);
+        returnUrl.searchParams.append('payment_retry', 'true');
+        returnUrl.searchParams.append('timestamp', Date.now().toString());
+
+        window.location.href = returnUrl.toString();
+    }
+
+    // Показать детальный отчет (для отладки)
+    function showDetailedReport() {
+        const report = {
+            returnUrl: returnUrl,
+            orderId: orderId,
+            operationId: operationId,
+            amount: amount,
+            product: product,
+            timestamp: new Date().toISOString()
+        };
+
+        alert('Детальный отчет:\n' + JSON.stringify(report, null, 2));
+        console.log('Детальный отчет:', report);
+    }
+
+    // Отмена автоматического возврата
+    function cancelAutoReturn() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            const returnBtn = document.getElementById('returnToSiteBtn');
+            const returnTimer = document.getElementById('returnTimer');
+            const countdownElement = document.getElementById('countdown');
+
+            if (returnTimer) returnTimer.textContent = '';
+            if (countdownElement) countdownElement.textContent = 'отменен';
+
+            // Показываем сообщение
+            if (countdownElement && countdownElement.parentElement) {
+                countdownElement.parentElement.innerHTML =
+                    '<i class="fas fa-info-circle" style="margin-right: 8px;"></i>' +
+                    'Автоматический возврат отменен. Нажмите кнопку выше для возврата вручную.';
+            }
+        }
+    }
+</script>
+
+<!-- Иконки FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Дополнительные стили для кнопки отмены (опционально) -->
+<style>
+    .cancel-btn {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: underline;
+        margin-top: 10px;
+    }
+
+    .cancel-btn:hover {
+        color: #343a40;
+    }
+
+    .debug-info {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        z-index: 1000;
+    }
+</style>
+
+<!-- Кнопка для отмены автоматического возврата -->
+<div th:if="${returnUrl != null and !returnUrl.isEmpty()}" style="text-align: center; margin-top: 10px;">
+    <button onclick="cancelAutoReturn()" class="cancel-btn">
+        <i class="fas fa-times" style="margin-right: 5px;"></i>
+        Отменить автоматический возврат
     </button>
 </div>
+
+
 </body>
 </html>

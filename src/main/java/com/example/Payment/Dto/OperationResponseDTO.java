@@ -1,6 +1,7 @@
 package com.example.Payment.Dto;
 
 import com.example.Payment.Tables.Operation;
+import jakarta.persistence.Column;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,6 +13,9 @@ public class OperationResponseDTO {
     private String purpose;
     private String maskedCardNumber; // Маскированный номер карты для безопасности
     private String status;
+    private String errorCode; // Код ошибки
+    private String errorDetails; // Детали ошибки
+    private String gatewayMessage;
     private LocalDateTime createdAt;
 
     // Конструктор из Entity
@@ -23,6 +27,9 @@ public class OperationResponseDTO {
         this.maskedCardNumber = maskCardNumber(operation.getCard_number());
         this.status = operation.getStatus();
         this.createdAt = operation.getCreated_at();
+        this.errorCode = operation.getErrorCode();
+        this.errorDetails = operation.getErrorDetails();
+        this.gatewayMessage = operation.getGatewayMessage();
     }
 
     private String maskCardNumber(String cardNumber) {
@@ -42,4 +49,16 @@ public class OperationResponseDTO {
     public String getMaskedCardNumber() { return maskedCardNumber; }
     public String getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public String getErrorDetails() {
+        return errorDetails;
+    }
+
+    public String getGatewayMessage() {
+        return gatewayMessage;
+    }
 }
